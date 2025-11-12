@@ -9,7 +9,7 @@ with open('data.json', 'r') as file:
 
 # Our position
 t_r = data['turrets']['1']['r']
-t_theta = data['theta']['1']['theta']
+t_theta = data['turrets']['1']['theta']
 
 # Passive target positions
 p_r1 = data['globes']['1']['r']
