@@ -5,4 +5,7 @@ import json
 with open('data.json', 'r') as file:
     data = json.load(file)
 
-print(json.dumps(data, indent=1))
+r1 = data['turrets']['r']
+
+# Step 4: Print the extracted data
+print(f"radius: {r1}")
