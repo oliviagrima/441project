@@ -12,7 +12,7 @@ t_r = data['turrets']['1']['r']
 t_theta = data['turrets']['1']['theta']
 
 # Passive target positions
-p_r1 = data['globes']['r']
+p_r1 = data['globes'][0]
 p_theta1 = data['globes']['theta']
 p_z1 = data['globes']['z']
 p_r2 = data['globes']['r']
