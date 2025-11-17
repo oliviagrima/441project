@@ -1,9 +1,50 @@
 import RPi.GPIO as GPIO
 import time
 import json
-
+"""
 with open('data.json', 'r') as file:
     data = json.load(file)
+"""
+
+def read_tur_pos(url, id){
+    try:
+        response = requests.get(url)
+        data = response.json()
+
+        turret_data = data['turrets'].get(str((id))
+        if turret_data is None:
+            return {"error: no team id found"}
+
+        return {
+            "r": turret_data['r']
+            "theta" : turret_data['theta]
+        }
+
+    except Exception as e:
+        return {"error": str(e)}
+}
+
+def read_tar_pos(url){
+    try:
+        response = requests.get(url)
+        data = response.json()
+
+        p_data = []
+        for i in range (2)
+            p_data[end+1] = data['globes'].get(i)
+
+        if p_data is None:
+            return {"error: no position data found"}
+
+        return {
+            "r": p_data['r']
+            "theta" : turret_data['theta]
+        }
+
+    except Exception as e:
+        return {"error": str(e)}
+}
+
 
 # Team #: 5
 
