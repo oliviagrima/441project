@@ -24,10 +24,10 @@ def read_tur_pos(url, id):
     except Exception as e:
         return {"error": str(e)}
 
-def read_target_positions(json_url):
+def read_target_positions(url):
     """Download JSON and return a list of globe positions."""
     try:
-        response = requests.get(json_url)
+        response = requests.get(url)
         data = response.json()
 
         # "globes" is a list in the JSON file
