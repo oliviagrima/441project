@@ -43,7 +43,7 @@ def read_target_positions(url):
             target_list.append({
                 "r": g["r"],
                 "theta": g["theta"],
-                "z": g["z"]
+                "h": g["h"]
             })
 
         return {"targets": target_list}
