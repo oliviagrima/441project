@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Read Turret Position</h2>
+
+<label>Team ID:</label>
+<input id="team" type="number">
+<br><br>
+
+<button onclick="readJSON()">Read Position</button>
+
+<p id="output"></p>
+
+<script>
+function readJSON() {
+    fetch("/read_json", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            url: "http://192.168.1.254:8000/positions.json",
+            team: document.getElementById("team").value
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("output").innerText = JSON.stringify(data);
+    });
+}
+</script>
+
+</body>
+</html>
