@@ -1,30 +1,73 @@
 <!DOCTYPE html>
 <html>
+<head>
+    <title>JSON Reader</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .box { border: 1px solid #aaa; padding: 15px; margin-bottom: 20px; }
+        input { width: 300px; padding: 5px; }
+        button { padding: 8px 12px; }
+        pre { background: #eee; padding: 10px; }
+    </style>
+</head>
 <body>
 
-<h2>Read Turret Position</h2>
+<h1>Read JSON Data</h1>
 
-<label>Team ID:</label>
-<input id="team" type="number">
-<br><br>
+<div class="box">
+    <h2>Read Turret JSON</h2>
 
-<button onclick="readJSON()">Read Position</button>
+    <label>URL:</label><br>
+    <input id="turretUrl" type="text" placeholder="Enter JSON URL"><br><br>
 
-<p id="output"></p>
+    <label>Team ID:</label><br>
+    <input id="teamId" type="number" placeholder="Team #"><br><br>
+
+    <button onclick="loadTurret()">Get Turret Position</button>
+
+    <h3>Result:</h3>
+    <pre id="turretResult"></pre>
+</div>
+
+<div class="box">
+    <h2>Read Target List</h2>
+
+    <label>URL:</label><br>
+    <input id="targetUrl" type="text" placeholder="Enter JSON URL"><br><br>
+
+    <button onclick="loadTargets()">Get Targets</button>
+
+    <h3>Result:</h3>
+    <pre id="targetResult"></pre>
+</div>
 
 <script>
-function readJSON() {
+function loadTurret() {
+    const url = document.getElementById("turretUrl").value;
+    const team = document.getElementById("teamId").value;
+
     fetch("/read_json", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-            url: "http://192.168.1.254:8000/positions.json",
-            team: document.getElementById("team").value
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: url, team: team })
     })
     .then(res => res.json())
     .then(data => {
-        document.getElementById("output").innerText = JSON.stringify(data);
+        document.getElementById("turretResult").textContent = JSON.stringify(data, null, 2);
+    });
+}
+
+function loadTargets() {
+    const url = document.getElementById("targetUrl").value;
+
+    fetch("/read_targets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: url })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("targetResult").textContent = JSON.stringify(data, null, 2);
     });
 }
 </script>
