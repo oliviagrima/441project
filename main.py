@@ -12,18 +12,17 @@ def read_tur_pos(url, id):
         response = requests.get(url)
         data = response.json()
 
-        turret_data = data['turrets'].get(str(id))
+        turret_data = data["turrets"].get(str(id))
         if turret_data is None:
-            return {"error: no team id found"}
+            return {"error": "team id not found"}
 
         return {
-            "r": turret_data['r'],
-            "theta": turret_data['theta']
+            "r": turret_data["r"],
+            "theta": turret_data["theta"]
         }
 
     except Exception as e:
         return {"error": str(e)}
-
 
 def read_target_positions(json_url):
     """Download JSON and return a list of globe positions."""
