@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, render_template
 import RPi.GPIO as GPIO
 import time
 import json
+import requests
 
 app = Flask(__name__)
 
