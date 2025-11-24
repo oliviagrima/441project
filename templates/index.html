@@ -101,8 +101,7 @@ function moveToSelectedTarget() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            motor: 1,
-            angle: parseFloat(theta)
+            angle: parseFloat(theta)   // <- only send angle
         })
     })
     .then(res => res.json())
