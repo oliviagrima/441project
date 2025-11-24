@@ -151,8 +151,8 @@ def my_turret():
 @app.route("/move_motor", methods=["POST"])
 def move_motor():
 
-    angle_theta = request.json.get("theta")
-    z = request.json.get("z", 0)  # default 0 if no z provided
+    angle_theta = float(request.json.get("theta"))
+    z = float(request.json.get("z", 0))  # default 0 if no z provided
 
     if angle_theta is None:
         return jsonify({"error": "No theta provided"}), 400
