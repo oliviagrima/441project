@@ -150,15 +150,24 @@ def my_turret():
 
 @app.route("/move_motor", methods=["POST"])
 def move_motor():
-    angle = request.json.get("angle")
 
-    if angle is None:
-        return jsonify({"error": "No angle provided"}), 400
+    angle_theta = request.json.get("theta")
+    z = request.json.get("z", 0)  # default 0 if no z provided
 
-    # Motor 1 rotates theta
-    m1.goAngle(angle)
+    if angle_theta is None:
+        return jsonify({"error": "No theta provided"}), 400
 
-    return jsonify({"status": "moving", "motor": 1, "angle": angle})
+    # Move motor 1 (theta) first
+    m1.goAngle(angle_theta, blocking=True)
+    # Then motor 2 (z/elevation)
+    if z is not None:
+        m2.goAngle(z, blocking=True)
+
+    return jsonify({
+        "status": "moving",
+        "motor1_theta": angle_theta,
+        "motor2_z": z
+    })
 
 """delete later"""
 @app.route("/positions.json")
