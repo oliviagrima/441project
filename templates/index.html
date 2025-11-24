@@ -1,115 +1,134 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>JSON Reader</title>
+    <title>Turret Control</title>
     <style>
         body { font-family: Arial; padding: 20px; }
         .box { border: 1px solid #aaa; padding: 15px; margin-bottom: 20px; }
         input { width: 300px; padding: 5px; }
-        button { padding: 8px 12px; }
-        pre { background: #eee; padding: 10px; }
+        button { padding: 8px 12px; margin-top: 5px; }
+        pre { background: #eee; padding: 10px; max-height: 200px; overflow: auto; }
     </style>
 </head>
 <body>
 
-<h1>Read JSON Data</h1>
+<h1>Turret Control</h1>
 
+<!-- MY TURRET -->
 <div class="box">
-    <h2>Read Turret JSON</h2>
-
-    <label>URL:</label><br>
-    <input id="turretUrl" type="text" placeholder="Enter JSON URL"><br><br>
-
-    <label>Team ID:</label><br>
-    <input id="teamId" type="number" placeholder="Team #"><br><br>
-
-    <button onclick="loadTurret()">Get Turret Position</button>
-    <button onclick="moveToTurret()">Move Motor to θ</button>
-    
-    <h3>Result:</h3>
-    <pre id="turretResult"></pre>
+    <h2>My Turret</h2>
+    <button onclick="loadMyTurret()">Refresh My θ</button>
+    <pre id="myTurretResult">θ will appear here</pre>
 </div>
 
+<!-- TARGETS -->
 <div class="box">
-    <h2>Read Target List</h2>
+    <h2>Targets (Globes)</h2>
+    <label>JSON URL:</label><br>
+    <input id="targetUrl" type="text" placeholder="Enter target JSON URL"><br>
+    <button onclick="loadTargets()">Load Targets</button>
+    <pre id="targetResult">Target data will appear here</pre>
+</div>
 
-    <label>URL:</label><br>
-    <input id="targetUrl" type="text" placeholder="Enter JSON URL"><br><br>
+<!-- OTHER TEAMS -->
+<div class="box">
+    <h2>Other Teams</h2>
+    <label>JSON URL:</label><br>
+    <input id="turretUrl" type="text" placeholder="Enter turret JSON URL"><br>
+    <button onclick="loadTeams()">Load Teams</button>
+    <pre id="teamResult">Team data will appear here</pre>
+</div>
 
-    <button onclick="loadTargets()">Get Targets</button>
-
-    <h3>Select Target:</h3>
-    <select id="targetSelect"></select>
-    <button onclick="moveToSelectedTarget()">Move Motor</button>
-
-    <h3>Result:</h3>
-    <pre id="targetResult"></pre>
+<!-- MOVE TURRET -->
+<div class="box">
+    <h2>Move Turret</h2>
+    <label>Select a θ:</label><br>
+    <select id="moveSelect"></select><br>
+    <button onclick="moveToSelected()">Move Turret</button>
 </div>
 
 <script>
-function loadTurret() {
-    const url = document.getElementById("turretUrl").value;
-    const team = document.getElementById("teamId").value;
-
-    fetch("/read_json", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: url, team: team })
-    })
-    .then(res => res.json())
-    .then(data => {
-        document.getElementById("turretResult").textContent = JSON.stringify(data, null, 2);
-    });
+// ---------- MY TURRET ----------
+function loadMyTurret() {
+    fetch("/my_turret")
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("myTurretResult").textContent =
+                "θ = " + data.theta.toFixed(2);
+        })
+        .catch(err => alert("Error reading my turret: " + err));
 }
 
+// ---------- TARGETS ----------
 function loadTargets() {
     const url = document.getElementById("targetUrl").value;
-
     fetch("/read_targets", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: url })
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({url})
     })
     .then(res => res.json())
     .then(data => {
-        document.getElementById("targetResult").textContent = JSON.stringify(data, null, 2);
-
-        const select = document.getElementById("targetSelect");
-        select.innerHTML = "";  // clear old entries
+        document.getElementById("targetResult").textContent =
+            JSON.stringify(data, null, 2);
 
         if (!data.targets) return;
 
-        // Populate dropdown with theta values
-        data.targets.forEach((t, index) => {
-            const option = document.createElement("option");
-            option.value = t.theta;
-            option.textContent = `Target ${index+1} — θ = ${t.theta}`;
-            select.appendChild(option);
-        });
+        const targetList = data.targets.map((t, i) => ({
+            theta: t.theta,
+            label: `Target ${i+1}`
+        }));
+        populateMoveDropdown(targetList);
+    })
+    .catch(err => alert("Error loading targets: " + err));
+}
+
+// ---------- OTHER TEAMS ----------
+function loadTeams() {
+    const url = document.getElementById("turretUrl").value;
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("teamResult").textContent =
+                JSON.stringify(data, null, 2);
+
+            if (!data.turrets) return;
+
+            const teamList = Object.keys(data.turrets).map(teamId => ({
+                theta: data.turrets[teamId].theta,
+                label: "Team " + teamId
+            }));
+            populateMoveDropdown(teamList);
+        })
+        .catch(err => alert("Error loading teams: " + err));
+}
+
+// ---------- POPULATE MOVE DROPDOWN ----------
+function populateMoveDropdown(list) {
+    const select = document.getElementById("moveSelect");
+
+    // Keep existing options and append new ones
+    list.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item.theta;
+        option.textContent = item.label + " — θ = " + item.theta;
+        select.appendChild(option);
     });
 }
 
-function moveToSelectedTarget() {
-    const theta = document.getElementById("targetSelect").value;
-
-    if (!theta) {
-        alert("No target selected!");
-        return;
-    }
+// ---------- MOVE TO SELECTED ----------
+function moveToSelected() {
+    const theta = document.getElementById("moveSelect").value;
+    if (!theta) return alert("Select a θ to move to!");
 
     fetch("/move_motor", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            angle: parseFloat(theta)   // <- only send angle
-        })
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({angle: parseFloat(theta)})
     })
-    .then(res => res.json())
-    .then(data => {
-        alert("Motor moving to θ = " + theta);
-    });
+    .then(() => alert("Moving turret to θ = " + theta))
+    .catch(err => alert("Error moving turret: " + err));
 }
-
 </script>
 
 </body>
