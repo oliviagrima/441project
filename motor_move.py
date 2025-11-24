@@ -85,28 +85,28 @@ class Stepper:
         p = multiprocessing.Process(target=self.__rotate, args=(delta,))
         p.start()
 
-    # Move to an absolute angle taking the shortest possible path:
-def goAngle(self, angle, blocking=False):
-    # Normalize target angle to [0, 360)
-    angle %= 360
-
-    # Read current angle from shared memory
-    current_angle = self.angle.value
-
-    # Compute shortest rotation delta
-    delta = (angle - current_angle + 180) % 360 - 180
-
-    # Launch rotation in a separate process
-    time.sleep(0.1)
-    p = multiprocessing.Process(target=self.__rotate, args=(delta,))
-    p.start()
-
-    if blocking:
-        p.join()  # wait for motor to finish before returning
-
+        # Move to an absolute angle taking the shortest possible path:
+    def goAngle(self, angle, blocking=False):
+        # Normalize target angle to [0, 360)
+        angle %= 360
+    
+        # Read current angle from shared memory
+        current_angle = self.angle.value
+    
+        # Compute shortest rotation delta
+        delta = (angle - current_angle + 180) % 360 - 180
+    
+        # Launch rotation in a separate process
+        time.sleep(0.1)
+        p = multiprocessing.Process(target=self.__rotate, args=(delta,))
+        p.start()
+    
+        if blocking:
+            p.join()  # wait for motor to finish before returning
+    
     def zero(self):
-    with self.angle.get_lock():
-        self.angle.value = 0.0
+        with self.angle.get_lock():
+            self.angle.value = 0.0
 
 
 # Example use:
