@@ -84,10 +84,28 @@ def read_targets():
     result = read_target_positions(url)
     return jsonify(result)
 
-@app.route("/my_turret", methods=["GET"])
+@app.route("/my_turret", methods=["POST"])
 def my_turret():
-    with m1.angle.get_lock():
-        return jsonify({"theta": m1.angle.value})
+    url = request.json.get("url")
+    team_id = request.json.get("team")
+
+    if not url or not team_id:
+        return jsonify({"error": "Provide JSON URL and your team ID"}), 400
+
+    try:
+        response = requests.get(url)
+        data = response.json()
+        turret_data = data["turrets"].get(str(team_id))
+
+        if not turret_data:
+            return jsonify({"error": "Team ID not found"}), 404
+
+        return jsonify({
+            "r": turret_data["r"],
+            "theta": turret_data["theta"]
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/move_motor", methods=["POST"])
 def move_motor():
