@@ -32,6 +32,18 @@
     <pre id="myTurretResult">θ will appear here</pre>
 </div>
 
+<div class="box">
+    <h2>Manual Motor Control</h2>
+
+    <h3>Horizontal (θ)</h3>
+    <button onmousedown="startManualMove('theta', -1)" onmouseup="stopManualMove()" onmouseleave="stopManualMove()">◀</button>
+    <button onmousedown="startManualMove('theta', 1)" onmouseup="stopManualMove()" onmouseleave="stopManualMove()">▶</button>
+
+    <h3>Vertical (z)</h3>
+    <button onmousedown="startManualMove('z', -1)" onmouseup="stopManualMove()" onmouseleave="stopManualMove()">▼</button>
+    <button onmousedown="startManualMove('z', 1)" onmouseup="stopManualMove()" onmouseleave="stopManualMove()">▲</button>
+</div>
+    
 <!-- TARGETS INFO: display only, no selection -->
 <div class="box">
     <h2>Targets</h2>
@@ -114,6 +126,40 @@ function loadTargets() {
     .catch(err => alert("Error loading targets: " + err));
 }
 
+let manualInterval = null;
+
+// start moving motor continuously
+function startManualMove(motor, dir) {
+    moveOneDegree(motor, dir);  // initial step
+
+    manualInterval = setInterval(() => {
+        moveOneDegree(motor, dir);
+    }, 150);  // repeat every 150 ms while holding
+}
+
+// stop moving
+function stopManualMove() {
+    if (manualInterval) {
+        clearInterval(manualInterval);
+        manualInterval = null;
+    }
+}
+
+// move 1 degree (or more if needed)
+function moveOneDegree(motor, dir) {
+    let theta = 0;
+    let z = 0;
+
+    if (motor === 'theta') theta = dir * (Math.PI / 180); // convert 1 deg to rad
+    if (motor === 'z') z = dir * 1; // 1 cm step; adjust to your system
+
+    fetch("/move_motor", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({theta: theta, z: z})
+    }).catch(err => console.log("Error moving motor:", err));
+}
+
 // ---------- POPULATE MOVE DROPDOWN ----------
 function populateMoveDropdown(list) {
     const select = document.getElementById("moveSelect");
@@ -140,6 +186,8 @@ function populateMoveDropdown(list) {
     });
 }
 
+
+    
 // ---------- MOVE TURRET TO SELECTED TARGET ----------
 function moveToSelected() {
     const select = document.getElementById("moveSelect");
