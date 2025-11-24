@@ -141,12 +141,16 @@ function moveToSelected() {
     const theta = select.value;
     if (!theta) return alert("Select a target!");
 
+    const selectedIndex = select.selectedIndex;
+    let z = select.options[selectedIndex].dataset.z;
+    if (z !== undefined) z = parseFloat(z); // only use if defined
+
     fetch("/move_motor", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({angle: parseFloat(theta)})
+        body: JSON.stringify({theta: theta, z: z})
     })
-    .then(() => alert("Moving turret to θ = " + theta))
+    .then(() => alert(`Moving turret to θ = ${theta}` + (z !== undefined ? `, z = ${z}` : "")))
     .catch(err => alert("Error moving turret: " + err));
 }
 </script>
