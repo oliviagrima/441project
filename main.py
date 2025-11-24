@@ -1,10 +1,24 @@
 from flask import Flask, request, jsonify, render_template
+from stepper_class_shiftregister_multiprocessing import Stepper
+from shifter import Shifter
+import multiprocessing
 import RPi.GPIO as GPIO
 import time
 import json
 import requests
 
 app = Flask(__name__)
+
+s = Shifter(data=16, latch=20, clock=21)
+
+lock1 = multiprocessing.Lock()
+lock2 = multiprocessing.Lock()
+
+m1 = Stepper(s, lock1)
+m2 = Stepper(s, lock2)
+
+m1.zero()
+m2.zero()
 
 def read_tur_pos(url, id):
     """Download JSON and return turret position for given id."""
