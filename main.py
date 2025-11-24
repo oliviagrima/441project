@@ -150,17 +150,18 @@ def my_turret():
 
 @app.route("/move_motor", methods=["POST"])
 def move_motor():
-
-    angle_theta = float(request.json.get("theta"))
-    z = float(request.json.get("z", 0))  # default 0 if no z provided
-
-    if angle_theta is None:
-        return jsonify({"error": "No theta provided"}), 400
+    try:
+        import math
+        # Convert theta from radians to degrees
+        angle_theta = math.degrees(float(request.json.get("theta")))
+        z = float(request.json.get("z", 0))
+    except Exception as e:
+        return jsonify({"error": f"Invalid input: {e}"}), 400
 
     # Move motor 1 (theta) first
     m1.goAngle(angle_theta, blocking=True)
-    # Then motor 2 (z/elevation)
-    if z is not None:
+    # Then motor 2 (z/elevation), only if non-zero
+    if z != 0:
         m2.goAngle(z, blocking=True)
 
     return jsonify({
