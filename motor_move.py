@@ -86,7 +86,7 @@ class Stepper:
         p.start()
 
     # Move to an absolute angle taking the shortest possible path:
-    def goAngle(self, angle):
+    def goAngle(self, angle, blocking=True):
          # Normalize target angle to [0, 360)
         angle %= 360
     
@@ -96,10 +96,14 @@ class Stepper:
         # Compute shortest rotation delta
         delta = (angle - current_angle + 180) % 360 - 180
     
-        # Launch rotation in a separate process
-        time.sleep(0.1)
-        p = multiprocessing.Process(target=self.__rotate, args=(delta,))
-        p.start()
+        if blocking:
+            # Move in the same process (sequential)
+            self.__rotate(delta)
+        else:
+            # Launch rotation in a separate process (old behavior)
+            time.sleep(0.1)
+            p = multiprocessing.Process(target=self.__rotate, args=(delta,))
+            p.start()
 
 
 
