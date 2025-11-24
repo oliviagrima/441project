@@ -103,24 +103,23 @@ function loadTargets() {
     .catch(err => alert("Error loading targets: " + err));
 }
 
-// ---------- POPULATE MOVE DROPDOWN ----------
-function populateMoveDropdown(list) {
-    const select = document.getElementById("moveSelect");
+// ---------- POPULATE DROPDOWN ----------
+function populateDropdown(selectId, list, labelFunc) {
+    const select = document.getElementById(selectId);
+    select.innerHTML = ""; // Limpiar opciones anteriores
 
-    // Clear existing options
-    select.innerHTML = "";
-
-    list.forEach(item => {
+    list.forEach((item, i) => {
         const option = document.createElement("option");
         option.value = item.theta;
-        option.textContent = item.label + " — θ = " + item.theta;
+        option.textContent = labelFunc(item, i) + " — θ = " + item.theta;
         select.appendChild(option);
     });
 }
 
 // ---------- MOVE TO SELECTED ----------
-function moveToSelected() {
-    const theta = document.getElementById("moveSelect").value;
+function moveToSelected(selectId) {
+    const select = document.getElementById(selectId);
+    const theta = select.value;
     if (!theta) return alert("Select a θ to move to!");
 
     fetch("/move_motor", {
