@@ -31,10 +31,18 @@
 
 <!-- TARGETS -->
 <div class="box">
-    <h2>Targets (Globes)</h2>
+    <h2>Targets</h2>
+    
     <label>JSON URL:</label><br>
     <input id="targetUrl" type="text" placeholder="Enter target JSON URL"><br>
     <button onclick="loadTargets()">Load Targets</button>
+    
+    <h3>Other Turrets</h3>
+    <select id="turretSelect"></select>
+    
+    <h3>Globes</h3>
+    <select id="globeSelect"></select>
+    
     <pre id="targetResult">Target data will appear here</pre>
 </div>
 
@@ -43,7 +51,8 @@
     <h2>Move Turret</h2>
     <label>Select a θ:</label><br>
     <select id="moveSelect"></select><br>
-    <button onclick="moveToSelected()">Move Turret</button>
+    <button onclick="moveToSelected('turretSelect')">Move to Turret</button>
+    <button onclick="moveToSelected('globeSelect')">Move to Globe</button>
 </div>
 
 <script>
@@ -85,12 +94,11 @@ function loadTargets() {
 
         if (!data.targets) return;
 
-        const targetList = data.targets.map((t, i) => ({
-            theta: t.theta,
-            label: t.type === "turret" ? `Turret ${t.id}` : `Globe ${i+1}`
-        }));
-        populateMoveDropdown(targetList);
+        const turrets = data.targets.filter(t => t.type === "turret");
+        const globes = data.targets.filter(t => t.type === "globe");
 
+        populateDropdown("turretSelect", turrets, t => `Turret ${t.id}`);
+        populateDropdown("globeSelect", globes, (t, i) => `Globe ${i+1}`);
     })
     .catch(err => alert("Error loading targets: " + err));
 }
