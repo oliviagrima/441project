@@ -38,15 +38,6 @@
     <pre id="targetResult">Target data will appear here</pre>
 </div>
 
-<!-- OTHER TEAMS -->
-<div class="box">
-    <h2>Other Teams</h2>
-    <label>JSON URL:</label><br>
-    <input id="turretUrl" type="text" placeholder="Enter turret JSON URL"><br>
-    <button onclick="loadTeams()">Load Teams</button>
-    <pre id="teamResult">Team data will appear here</pre>
-</div>
-
 <!-- MOVE TURRET -->
 <div class="box">
     <h2>Move Turret</h2>
@@ -101,26 +92,6 @@ function loadTargets() {
         populateMoveDropdown(targetList);
     })
     .catch(err => alert("Error loading targets: " + err));
-}
-
-// ---------- OTHER TEAMS ----------
-function loadTeams() {
-    const url = document.getElementById("turretUrl").value;
-    fetch(url)
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById("teamResult").textContent =
-                JSON.stringify(data, null, 2);
-
-            if (!data.turrets) return;
-
-            const teamList = Object.keys(data.turrets).map(teamId => ({
-                theta: data.turrets[teamId].theta,
-                label: "Team " + teamId
-            }));
-            populateMoveDropdown(teamList);
-        })
-        .catch(err => alert("Error loading teams: " + err));
 }
 
 // ---------- POPULATE MOVE DROPDOWN ----------
