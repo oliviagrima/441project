@@ -127,10 +127,15 @@ function populateMoveDropdown(list) {
             label = `Globe ${i + 1}`;
         }
 
-        // Create option element
         const option = document.createElement("option");
         option.value = item.theta;
         option.textContent = label + " — θ = " + item.theta.toFixed(3);
+        
+        // Only set z for globes
+        if (item.type === "globe" && item.z !== undefined) {
+            option.dataset.z = item.z;
+        }
+
         select.appendChild(option);
     });
 }
@@ -138,6 +143,7 @@ function populateMoveDropdown(list) {
 // ---------- MOVE TURRET TO SELECTED TARGET ----------
 function moveToSelected() {
     const select = document.getElementById("moveSelect");
+    const theta = parseFloat(select.value);
     const theta = select.value;
     if (!theta) return alert("Select a target!");
 
