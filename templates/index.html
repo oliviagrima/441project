@@ -24,7 +24,8 @@
     <input id="teamId" type="number" placeholder="Team #"><br><br>
 
     <button onclick="loadTurret()">Get Turret Position</button>
-
+    <button onclick="moveToTurret()">Move Motor to θ</button>
+    
     <h3>Result:</h3>
     <pre id="turretResult"></pre>
 </div>
@@ -36,6 +37,10 @@
     <input id="targetUrl" type="text" placeholder="Enter JSON URL"><br><br>
 
     <button onclick="loadTargets()">Get Targets</button>
+
+    <h3>Select Target:</h3>
+    <select id="targetSelect"></select>
+    <button onclick="moveToSelectedTarget()">Move Motor</button>
 
     <h3>Result:</h3>
     <pre id="targetResult"></pre>
@@ -68,8 +73,44 @@ function loadTargets() {
     .then(res => res.json())
     .then(data => {
         document.getElementById("targetResult").textContent = JSON.stringify(data, null, 2);
+
+        const select = document.getElementById("targetSelect");
+        select.innerHTML = "";  // clear old entries
+
+        if (!data.targets) return;
+
+        // Populate dropdown with theta values
+        data.targets.forEach((t, index) => {
+            const option = document.createElement("option");
+            option.value = t.theta;
+            option.textContent = `Target ${index+1} — θ = ${t.theta}`;
+            select.appendChild(option);
+        });
     });
 }
+
+function moveToSelectedTarget() {
+    const theta = document.getElementById("targetSelect").value;
+
+    if (!theta) {
+        alert("No target selected!");
+        return;
+    }
+
+    fetch("/move_motor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            motor: 1,
+            angle: parseFloat(theta)
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert("Motor moving to θ = " + theta);
+    });
+}
+
 </script>
 
 </body>
