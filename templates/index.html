@@ -87,9 +87,10 @@ function loadTargets() {
 
         const targetList = data.targets.map((t, i) => ({
             theta: t.theta,
-            label: `Target ${i+1}`
+            label: t.type === "turret" ? `Turret ${t.id}` : `Globe ${i+1}`
         }));
         populateMoveDropdown(targetList);
+
     })
     .catch(err => alert("Error loading targets: " + err));
 }
@@ -98,7 +99,9 @@ function loadTargets() {
 function populateMoveDropdown(list) {
     const select = document.getElementById("moveSelect");
 
-    // Keep existing options and append new ones
+    // Clear existing options
+    select.innerHTML = "";
+
     list.forEach(item => {
         const option = document.createElement("option");
         option.value = item.theta;

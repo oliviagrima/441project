@@ -75,31 +75,36 @@ def read_tur_pos(url, id):
         return {"error": str(e)}
 
 def read_target_positions(url):
-    """Download JSON and return a list of globe positions."""
+    """Download JSON and return a list of all targets: globes + other turrets."""
     try:
         response = requests.get(url)
         data = response.json()
 
-        # "globes" is a list in the JSON file
-        globes = data.get("globes")
+        targets = []
 
-        if globes is None:
-            return {"error": "No 'globes' data found in JSON"}
-
-        # Build a clean list of globe coordinates
-        target_list = []
-
-        for g in globes:
-            target_list.append({
-                "r": g["r"],
+        # Agregar globes
+        for g in data.get("globes", []):
+            targets.append({
+                "type": "globe",
                 "theta": g["theta"],
-                "z": g["z"]
+                "r": g["r"],
+                "z": g.get("z", 0)
             })
 
-        return {"targets": target_list}
+        # Agregar turrets (oponentes)
+        for tid, tdata in data.get("turrets", {}).items():
+            targets.append({
+                "type": "turret",
+                "theta": tdata["theta"],
+                "r": tdata["r"],
+                "id": tid
+            })
+
+        return {"targets": targets}
 
     except Exception as e:
         return {"error": str(e)}
+
 
 @app.route("/")
 def index():
