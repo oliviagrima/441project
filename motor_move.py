@@ -104,6 +104,10 @@ def goAngle(self, angle, blocking=False):
     if blocking:
         p.join()  # wait for motor to finish before returning
 
+    def zero(self):
+    with self.angle.get_lock():
+        self.angle.value = 0.0
+
 
 # Example use:
 
