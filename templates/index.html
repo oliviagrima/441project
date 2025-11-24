@@ -143,7 +143,6 @@ function populateMoveDropdown(list) {
 // ---------- MOVE TURRET TO SELECTED TARGET ----------
 function moveToSelected() {
     const select = document.getElementById("moveSelect");
-    const theta = parseFloat(select.value);
     const theta = select.value;
     if (!theta) return alert("Select a target!");
 
