@@ -14,6 +14,13 @@
 
 <h1>Turret Control</h1>
 
+<div class="box">
+    <h2>Turret JSON URL</h2>
+    <input id="jsonUrl" type="text" placeholder="Enter JSON URL"><br><br>
+    <button onclick="setJsonUrl()">Set URL</button>
+    <pre id="urlStatus">URL not set</pre>
+</div>
+
 <!-- MY TURRET -->
 <div class="box">
     <h2>My Turret</h2>
@@ -56,36 +63,45 @@
 </div>
 
 <script>
+
+let turretJsonUrl = null; // global variable to store the URL
+
+function setJsonUrl() {
+    const url = document.getElementById("jsonUrl").value;
+    if (!url) return alert("Enter a URL!");
+
+    turretJsonUrl = url;
+    document.getElementById("urlStatus").textContent = "URL set: " + url;
+}
+
+
 // ---------- MY TURRET ----------
 function loadMyTurret() {
-    const url = document.getElementById("myTurretUrl").value;
     const team = document.getElementById("myTeamId").value;
-
-    if (!url || !team) return alert("Enter URL and Team ID!");
+    if (!turretJsonUrl) return alert("Set the JSON URL first!");
+    if (!team) return alert("Enter your Team ID!");
 
     fetch("/my_turret", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: url, team: team })
+        body: JSON.stringify({ url: turretJsonUrl, team: team })
     })
     .then(res => res.json())
     .then(data => {
         if (data.error) return alert(data.error);
-
-        document.getElementById("myTurretResult").textContent =
-            `θ = ${data.theta}`;
+        document.getElementById("myTurretResult").textContent = `θ = ${data.theta}`;
     })
     .catch(err => alert("Error: " + err));
 }
 
-
 // ---------- TARGETS ----------
 function loadTargets() {
-    const url = document.getElementById("targetUrl").value;
+    if (!turretJsonUrl) return alert("Set the JSON URL first!");
+
     fetch("/read_targets", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({url})
+        body: JSON.stringify({ url: turretJsonUrl })
     })
     .then(res => res.json())
     .then(data => {
