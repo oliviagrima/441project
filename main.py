@@ -84,5 +84,17 @@ def read_targets():
     result = read_target_positions(url)
     return jsonify(result)
 
+@app.route("/move_motor", methods=["POST"])
+def move_motor():
+    angle = request.json.get("angle")
+
+    if angle is None:
+        return jsonify({"error": "No angle provided"}), 400
+
+    # Motor 1 rotates theta
+    m1.goAngle(angle)
+
+    return jsonify({"status": "moving", "motor": 1, "angle": angle})
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
