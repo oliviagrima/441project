@@ -84,6 +84,11 @@ def read_targets():
     result = read_target_positions(url)
     return jsonify(result)
 
+@app.route("/my_turret", methods=["GET"])
+def my_turret():
+    with m1.angle.get_lock():
+        return jsonify({"theta": m1.angle.value})
+
 @app.route("/move_motor", methods=["POST"])
 def move_motor():
     angle = request.json.get("angle")
