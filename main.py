@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template
-from stepper_class_shiftregister_multiprocessing import Stepper
+from motor_move import Stepper
 from shifter import Shifter
 import multiprocessing
 import RPi.GPIO as GPIO
