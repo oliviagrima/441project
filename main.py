@@ -205,5 +205,13 @@ def positions():
 """
 
 if __name__ == "__main__":
-    init_hardware()
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    try:
+        init_hardware()
+        app.run(host="0.0.0.0", port=5000, debug=False)
+    except KeyboardInterrupt:
+        print("\nCtrl+C pressed — cleaning up GPIO and exiting.")
+        GPIO.cleanup()
+    except Exception as e:
+        print("Error:", e)
+        GPIO.cleanup()
+
