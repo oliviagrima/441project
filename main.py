@@ -21,7 +21,6 @@ lock2 = multiprocessing.Lock()
 # Initialize hardware safely
 def init_hardware():
     global s, m1, m2
-    GPIO.cleanup()  # Free pins from previous runs
     GPIO.setmode(GPIO.BCM)
     s = Shifter(data=16, latch=20, clock=21)
     m1 = Stepper(s, lock1)
