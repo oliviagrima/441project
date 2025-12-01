@@ -6,19 +6,33 @@ import RPi.GPIO as GPIO
 import time
 import json
 import requests
+import atexit
+import math
 
 app = Flask(__name__)
 
-s = Shifter(data=16, latch=20, clock=21)
-
+# Global placeholders for hardware objects
+s = None
+m1 = None
+m2 = None
 lock1 = multiprocessing.Lock()
 lock2 = multiprocessing.Lock()
 
-m1 = Stepper(s, lock1)
-m2 = Stepper(s, lock2)
+# Initialize hardware safely
+def init_hardware():
+    global s, m1, m2
+    GPIO.cleanup()  # Free pins from previous runs
+    s = Shifter(data=16, latch=20, clock=21)
+    m1 = Stepper(s, lock1)
+    m2 = Stepper(s, lock2)
+    m1.zero()
+    m2.zero()
 
-m1.zero()
-m2.zero()
+# Cleanup GPIO on exit
+def cleanup_hardware():
+    GPIO.cleanup()
+
+atexit.register(cleanup_hardware)
 
 """delete later"""
 positions_data = {
@@ -178,4 +192,5 @@ def positions():
     return jsonify(positions_data)
 
 if __name__ == "__main__":
+    init_hardware()
     app.run(host="0.0.0.0", port=5000)
