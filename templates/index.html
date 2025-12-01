@@ -130,6 +130,9 @@ let manualInterval = null;
 
 // start moving motor continuously
 function startManualMove(motor, dir) {
+
+    if (manualInterval !== null) return;
+    
     moveOneDegree(motor, dir);  // initial step
 
     manualInterval = setInterval(() => {
