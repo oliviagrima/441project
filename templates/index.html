@@ -127,26 +127,28 @@ function loadTargets() {
 }
 
 let manualInterval = null;
+let isManualActive = false;  // new flag
 
-// start moving motor continuously
 function startManualMove(motor, dir) {
+    if (!turretJsonUrl) return;   // prevent calls if URL not set
+    if (manualInterval !== null || isManualActive) return;
 
-    if (manualInterval !== null) return;
-    
+    isManualActive = true;
     moveOneDegree(motor, dir);  // initial step
 
     manualInterval = setInterval(() => {
         moveOneDegree(motor, dir);
-    }, 150);  // repeat every 150 ms while holding
+    }, 150);
 }
 
-// stop moving
 function stopManualMove() {
     if (manualInterval) {
         clearInterval(manualInterval);
         manualInterval = null;
     }
+    isManualActive = false;
 }
+
 
 // move 1 degree (or more if needed)
 function moveOneDegree(motor, dir) {
