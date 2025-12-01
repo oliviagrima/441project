@@ -5,7 +5,7 @@ from time import sleep
 
 class Shifter():
 
-    def __init__(self, data, clock, latch):
+    def __init__(self, data, latch ,clock):
         self.dataPin = data
         self.latchPin = latch
         self.clockPin = clock
