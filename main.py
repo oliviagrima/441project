@@ -21,7 +21,6 @@ m1.zero()
 m2.zero()
 
 """delete later"""
-"""
 positions_data = {
     "turrets": {
         "1": {"r": 300.0, "theta": 1.5882496193148399},
@@ -56,7 +55,6 @@ positions_data = {
         {"r": 300.0, "theta": 1.902408884673819, "z": 139.0}
     ]
 }
-"""
 
 def read_tur_pos(url, id):
     """Download JSON and return turret position for given id."""
@@ -175,11 +173,9 @@ def move_motor():
     })
 
 """delete later"""
-"""
 @app.route("/positions.json")
 def positions():
     return jsonify(positions_data)
-"""
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
