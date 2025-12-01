@@ -11,6 +11,8 @@ import math
 
 app = Flask(__name__)
 
+GPIO.setmode(GPIO.BCM)
+
 # Global placeholders for hardware objects
 s = None
 m1 = None
