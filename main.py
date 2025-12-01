@@ -195,11 +195,10 @@ def move_motor():
     })
 
 """delete later"""
-"""
+
 @app.route("/positions.json")
 def positions():
     return jsonify(positions_data)
-"""
 
 if __name__ == "__main__":
     try:
