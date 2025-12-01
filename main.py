@@ -24,7 +24,7 @@ def init_hardware():
     try:
         GPIO.cleanup()  # free any leftover pins from previous runs
         GPIO.setmode(GPIO.BCM)
-        s = Shifter(data=16, clock=21,latch=20 )
+        s = Shifter(data=16, latch=20,clock=21 )
         m1 = Stepper(s, lock1)
         m2 = Stepper(s, lock2)
         m1.zero()
