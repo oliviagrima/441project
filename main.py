@@ -6,40 +6,19 @@ import RPi.GPIO as GPIO
 import time
 import json
 import requests
-import atexit
-import math
 
 app = Flask(__name__)
 
-# Global placeholders for hardware objects
-s = None
-m1 = None
-m2 = None
+s = Shifter(data=16, latch=20, clock=21)
+
 lock1 = multiprocessing.Lock()
 lock2 = multiprocessing.Lock()
 
-# Initialize hardware safely
-def init_hardware():
-    global s, m1, m2
-    try:
-        GPIO.setwarnings(False)
-        GPIO.cleanup()  # free any leftover pins from previous runs
-        GPIO.setmode(GPIO.BCM)
-        s = Shifter(data=16, latch=20,clock=21 )
-        m1 = Stepper(s, lock1)
-        m2 = Stepper(s, lock2)
-        m1.zero()
-        m2.zero()
-    except Exception as e:
-        print("Error initializing hardware:", e)
-        GPIO.cleanup()  # ensure pins are freed
-        raise
+m1 = Stepper(s, lock1)
+m2 = Stepper(s, lock2)
 
-# Cleanup GPIO on exit
-def cleanup_hardware():
-    GPIO.cleanup()
-
-atexit.register(cleanup_hardware)
+m1.zero()
+m2.zero()
 
 """delete later"""
 """
@@ -181,9 +160,7 @@ def move_motor():
     except Exception as e:
         return jsonify({"error": f"Invalid input: {e}"}), 400
 
-    if theta_rad == 0 and z == 0:
-        return jsonify({"status": "ignored, no movement"}), 200  # ignore empty calls
-
+    # Convert theta from radians → degrees
     angle_theta = math.degrees(theta_rad)
 
     if angle_theta != 0:
@@ -205,13 +182,4 @@ def positions():
 """
 
 if __name__ == "__main__":
-    try:
-        init_hardware()
-        app.run(host="0.0.0.0", port=5000, debug=False)
-    except KeyboardInterrupt:
-        print("\nCtrl+C pressed — cleaning up GPIO and exiting.")
-        GPIO.cleanup()
-    except Exception as e:
-        print("Error:", e)
-        GPIO.cleanup()
-
+    app.run(host="0.0.0.0", port=5000)
