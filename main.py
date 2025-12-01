@@ -22,7 +22,11 @@ lock2 = multiprocessing.Lock()
 def init_hardware():
     global s, m1, m2
     GPIO.setmode(GPIO.BCM)
-    s = Shifter(data=16, latch=20, clock=21)
+    try:
+        s = Shifter(data=16, latch=20, clock=21)
+    except lgpio.error:
+        GPIO.cleanup()
+        s = Shifter(data=16, latch=20, clock=21)
     m1 = Stepper(s, lock1)
     m2 = Stepper(s, lock2)
     m1.zero()
