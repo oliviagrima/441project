@@ -6,6 +6,7 @@ import RPi.GPIO as GPIO
 import time
 import json
 import requests
+import atexit
 
 app = Flask(__name__)
 
