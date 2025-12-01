@@ -3,8 +3,6 @@
 from RPi import GPIO
 from time import sleep
 
-GPIO.setmode(GPIO.BCM)
-
 class Shifter():
 
     def __init__(self, data, clock, latch):
