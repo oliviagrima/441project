@@ -9,9 +9,14 @@ class Shifter():
         self.dataPin = data
         self.latchPin = latch
         self.clockPin = clock
-        GPIO.setup(self.dataPin, GPIO.OUT)
-        GPIO.setup(self.latchPin, GPIO.OUT)
-        GPIO.setup(self.clockPin, GPIO.OUT)
+        try:
+            GPIO.setup(self.dataPin, GPIO.OUT)
+            GPIO.setup(self.latchPin, GPIO.OUT)
+            GPIO.setup(self.clockPin, GPIO.OUT)
+        except RuntimeError as e:
+            print("GPIO setup error:", e)
+            GPIO.cleanup()
+            raise
 
     def ping(self, p):  # ping the clock or latch pin
         GPIO.output(p,1)
