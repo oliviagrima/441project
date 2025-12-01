@@ -21,16 +21,18 @@ lock2 = multiprocessing.Lock()
 # Initialize hardware safely
 def init_hardware():
     global s, m1, m2
-    GPIO.setmode(GPIO.BCM)
     try:
+        GPIO.cleanup()  # free any leftover pins from previous runs
+        GPIO.setmode(GPIO.BCM)
         s = Shifter(data=16, latch=20, clock=21)
-    except lgpio.error:
-        GPIO.cleanup()
-        s = Shifter(data=16, latch=20, clock=21)
-    m1 = Stepper(s, lock1)
-    m2 = Stepper(s, lock2)
-    m1.zero()
-    m2.zero()
+        m1 = Stepper(s, lock1)
+        m2 = Stepper(s, lock2)
+        m1.zero()
+        m2.zero()
+    except Exception as e:
+        print("Error initializing hardware:", e)
+        GPIO.cleanup()  # ensure pins are freed
+        raise
 
 # Cleanup GPIO on exit
 def cleanup_hardware():
