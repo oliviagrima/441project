@@ -35,6 +35,7 @@ def cleanup_hardware():
 atexit.register(cleanup_hardware)
 
 """delete later"""
+"""
 positions_data = {
     "turrets": {
         "1": {"r": 300.0, "theta": 1.5882496193148399},
@@ -69,6 +70,7 @@ positions_data = {
         {"r": 300.0, "theta": 1.902408884673819, "z": 139.0}
     ]
 }
+"""
 
 def read_tur_pos(url, id):
     """Download JSON and return turret position for given id."""
@@ -172,7 +174,9 @@ def move_motor():
     except Exception as e:
         return jsonify({"error": f"Invalid input: {e}"}), 400
 
-    # Convert theta from radians → degrees
+    if theta_rad == 0 and z == 0:
+        return jsonify({"status": "ignored, no movement"}), 200  # ignore empty calls
+
     angle_theta = math.degrees(theta_rad)
 
     if angle_theta != 0:
@@ -187,9 +191,11 @@ def move_motor():
     })
 
 """delete later"""
+"""
 @app.route("/positions.json")
 def positions():
     return jsonify(positions_data)
+"""
 
 if __name__ == "__main__":
     init_hardware()
