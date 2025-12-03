@@ -171,7 +171,7 @@ def my_turret():
         return jsonify({"error": str(e)}), 500
 
 import math
-
+"""
 @app.route("/move_motor", methods=["POST"])
 def move_motor():
     try:
@@ -192,6 +192,74 @@ def move_motor():
         "status": "moving",
         "motor1_theta": angle_theta,
         "motor2_z": z
+    })
+"""
+
+@app.route("/move_motor", methods=["POST"])
+def move_motor():
+    try:
+        url = request.json.get("url")           # JSON URL
+        team_id = request.json.get("team")      # Your turret ID
+        target_id = request.json.get("target_id")       # Target ID (for turrets)
+        target_type = request.json.get("target_type")   # "turret" or "globe"
+    except Exception as e:
+        return jsonify({"error": f"Invalid input: {e}"}), 400
+
+    # 1️⃣ Get your turret position from JSON
+    my_turret = read_tur_pos(url, team_id)
+    if "error" in my_turret:
+        return jsonify(my_turret), 400
+
+    r0 = my_turret["r"]
+    theta0 = my_turret["theta"]
+    z0 = 0  # Assume your turret's vertical position is 0
+
+    # 2️⃣ Get all targets
+    targets_data = read_target_positions(url)
+    if "error" in targets_data:
+        return jsonify(targets_data), 400
+
+    # 3️⃣ Find the selected target
+    target = None
+    for t in targets_data["targets"]:
+        if target_type == "turret" and t.get("type") == "turret" and t.get("id") == target_id:
+            target = t
+            break
+        elif target_type == "globe" and t.get("type") == "globe" and t.get("theta") == float(target_id):
+            target = t
+            break
+
+    if not target:
+        return jsonify({"error": "Target not found"}), 400
+
+    rt = target["r"]
+    thetat = target["theta"]
+    zt = target.get("z", 0)
+
+    # 4️⃣ Convert polar coordinates to Cartesian
+    x0 = r0 * math.cos(theta0)
+    y0 = r0 * math.sin(theta0)
+    xt = rt * math.cos(thetat)
+    yt = rt * math.sin(thetat)
+
+    dx = xt - x0
+    dy = yt - y0
+    dz = zt - z0
+
+    # 5️⃣ Calculate the angle to rotate
+    target_angle_rad = math.atan2(dy, dx)
+    target_angle_deg = math.degrees(target_angle_rad)
+
+    # 6️⃣ Move motors
+    if target_angle_deg != 0:
+        m1.goAngle(m1.angle.value + target_angle_deg, blocking=True)
+    if dz != 0:
+        m2.goAngle(m2.angle.value + dz, blocking=True)
+
+    return jsonify({
+        "status": "moving",
+        "motor1_theta_deg": target_angle_deg,
+        "motor2_z": dz
     })
 
 """delete later"""
