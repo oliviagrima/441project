@@ -114,10 +114,10 @@ function loadTargets() {
 
         // Display info in their respective sections
         document.getElementById("turretInfo").textContent =
-            turrets.map(t => `Turret ${t.id} — θ = ${t.theta.toFixed(3)}`).join("\n");
+            turrets.map(t => `Turret ${t.id} — θ = ${t.theta.toFixed(3)}, r = ${t.r.toFixed(1)}`).join("\n");
 
         document.getElementById("globeInfo").textContent =
-            globes.map((g, i) => `Globe ${i+1} — θ = ${g.theta.toFixed(3)}, z = ${g.z}`).join("\n");
+            globes.map((g, i) => `Globe ${i+1} — θ = ${g.theta.toFixed(3)}, r = ${g.r.toFixed(1)}, z = ${g.z}`).join("\n");
 
         // Populate move dropdown with all targets
         const moveList = turrets.concat(globes);
@@ -149,7 +149,6 @@ function stopManualMove() {
     isManualActive = false;
 }
 
-
 // move 1 degree (or more if needed)
 function moveOneDegree(motor, dir) {
     let theta = 0;
@@ -174,15 +173,16 @@ function populateMoveDropdown(list) {
         let label;
         if (item.type === "turret") {
             label = `Turret ${item.id}`;
-        } else {
+        } else { // globe
             label = `Globe ${i + 1}`;
         }
 
         const option = document.createElement("option");
         option.value = item.theta;
-        option.textContent = label + " — θ = " + item.theta.toFixed(3);
-        
-        // Only set z for globes
+        option.textContent = label + " — θ = " + item.theta.toFixed(3) + ", r = " + item.r.toFixed(1);
+
+        option.dataset.r = item.r;
+
         if (item.type === "globe" && item.z !== undefined) {
             option.dataset.z = item.z;
         }
@@ -191,24 +191,25 @@ function populateMoveDropdown(list) {
     });
 }
 
-
-    
 // ---------- MOVE TURRET TO SELECTED TARGET ----------
 function moveToSelected() {
     const select = document.getElementById("moveSelect");
-    const theta = select.value;
+    const theta = parseFloat(select.value);
     if (!theta) return alert("Select a target!");
 
     const selectedIndex = select.selectedIndex;
     let z = select.options[selectedIndex].dataset.z;
-    if (z !== undefined) z = parseFloat(z); // only use if defined
+    if (z !== undefined) z = parseFloat(z);
+
+    let r = select.options[selectedIndex].dataset.r;
+    if (r !== undefined) r = parseFloat(r);
 
     fetch("/move_motor", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({theta: theta, z: z})
+        body: JSON.stringify({theta: theta, z: z, r: r})
     })
-    .then(() => alert(`Moving turret to θ = ${theta}` + (z !== undefined ? `, z = ${z}` : "")))
+    .then(() => alert(`Moving turret to θ = ${theta}, r = ${r}` + (z !== undefined ? `, z = ${z}` : "")))
     .catch(err => alert("Error moving turret: " + err));
 }
 </script>
