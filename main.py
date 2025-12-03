@@ -261,7 +261,7 @@ def move_motor():
         thetat = target["theta"]
         zt = target.get("z", 0)
 
-        # Convert polar → Cartesian
+       # Convert polar to Cartesian in cm (no scaling needed)
         x0 = r0 * math.cos(theta0)
         y0 = r0 * math.sin(theta0)
         xt = rt * math.cos(thetat)
@@ -269,14 +269,18 @@ def move_motor():
 
         dx = xt - x0
         dy = yt - y0
-        dz = zt - z0
+        dz = zt - z0  # z in cm, same as r, no conversion needed
 
-        # Angle to rotate
+        # Compute angle to rotate relative to current orientation
         target_angle_rad = math.atan2(dy, dx)
-        target_angle_deg = math.degrees(target_angle_rad)
+        delta_rad = target_angle_rad - theta0
+        # normalize to [-pi, pi] to always rotate shortest path
+        delta_rad = (delta_rad + math.pi) % (2*math.pi) - math.pi
+        delta_deg = math.degrees(delta_rad)
 
-        if target_angle_deg != 0:
-            m1.goAngle(m1.angle.value + target_angle_deg, blocking=True)
+        # Move motors
+        if delta_deg != 0:
+            m1.goAngle(m1.angle.value + delta_deg, blocking=True)
         if dz != 0:
             m2.goAngle(m2.angle.value + dz, blocking=True)
 
