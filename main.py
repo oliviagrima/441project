@@ -290,6 +290,27 @@ def set_zero():
         "status": f"Zero set! theta0={theta_now:.2f}, z0={z_now:.2f}"
     })
 
+@app.route("/go_zero", methods=["POST"])
+def go_zero():
+    # Load zero offsets
+    try:
+        with open("zero.json", "r") as f:
+            data = json.load(f)
+            zero_theta = data.get("theta_zero", 0)
+            zero_z = data.get("z_zero", 0)
+    except:
+        return jsonify({"error": "No zero position saved yet"}), 400
+
+    # Move motors to *absolute* zero
+    m1.goAngle(zero_theta, blocking=True)
+    m2.goAngle(zero_z, blocking=True)
+
+    return jsonify({
+        "status": "moved to zero",
+        "theta_zero": zero_theta,
+        "z_zero": zero_z
+    })
+
 @app.route("/positions.json")
 def positions():
     return jsonify(load_positions())
