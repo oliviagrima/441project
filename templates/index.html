@@ -166,19 +166,25 @@ function moveOneDegree(motor, dir) {
 
 // ---------- MOVE TO ZERO ----------
 function setZero() {
-    fetch("/set_zero", {method: "POST"})
+    fetch("/set_zero", {
+        method: "POST",  // must be POST
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({})  // even empty JSON
+    })
     .then(res => res.json())
-    .then(data => {
-        document.getElementById("zeroStatus").textContent = data.status;
-    }).catch(err => alert("Error setting zero: " + err));
+    .then(data => alert(data.status))
+    .catch(err => alert("Error setting zero: " + err));
 }
 
 function goZero() {
-    fetch("/go_zero", {method: "POST"})
+    fetch("/go_zero", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({})
+    })
     .then(res => res.json())
-    .then(data => {
-        document.getElementById("zeroStatus").textContent = "Moved to zero";
-    }).catch(err => alert("Error moving to zero: " + err));
+    .then(data => alert("Moved to zero"))
+    .catch(err => alert("Error moving to zero: " + err));
 }
 
 // ---------- POPULATE MOVE DROPDOWN ----------
