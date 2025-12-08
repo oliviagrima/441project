@@ -54,11 +54,11 @@ def load_zero():
         with open(ZERO_FILE, "r") as f:
             return json.load(f)
     except:
-        return {"theta0": 0, "z0": 0}
+        return {"phi": 0, "z0": 0}
 
-def save_zero(theta0, z0):
+def save_zero(phi0, z0):
     with open(ZERO_FILE, "w") as f:
-        json.dump({"theta0": theta0, "z0": z0}, f, indent=4)
+        json.dump({"phi0": phi0, "z0": z0}, f, indent=4)
 
 def read_tur_pos(url, id):
     """Download JSON and return turret position for given id."""
@@ -245,10 +245,10 @@ def move_motor():
 @app.route("/set_zero", methods=["POST"])
 def set_zero():
     try:
-        theta_now = m1.angle.value
+        phi_now = m1.angle.value
         z_now = m2.angle.value
-        save_zero(theta_now, z_now)
-        return jsonify({"status": f"Zero set! theta0={theta_now:.2f}, z0={z_now:.2f}"})
+        save_zero(phi_now, z_now)
+        return jsonify({"status": f"Zero set! phi0={phi_now:.2f}, z0={z_now:.2f}"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
