@@ -215,6 +215,8 @@ def move_motor():
     # Load zero offsets
     zero = load_zero()  # expects {"phi0": ..., "z0": ...}
 
+    dist = sqrt(rt**2 + r0**2 - 2 * rt * r0 * math.cos(abs(thetat-theta0)))
+
     # Compute vector from turret to target
     dx = rt * math.cos(thetat) - r0 * math.cos(theta0)
     dy = rt * math.sin(thetat) - r0 * math.sin(theta0)
@@ -230,11 +232,13 @@ def move_motor():
     # Vertical movement
     dz = zt - z0 + zero.get("z0", 0)
 
+    z_cm_to_deg = dist * math.tan(5.625)      
+
     # Move motors
     if abs(phi_deg) > 0.01:
         m1.goAngle(m1.angle.value + phi_deg, blocking=True)
     if abs(dz) > 0.01:
-        m2.goAngle(m2.angle.value + dz, blocking=True)
+        m2.goAngle(m2.angle.value + dz * z_cm_to_deg, blocking=True)
 
     return jsonify({
         "status": "target moving",
