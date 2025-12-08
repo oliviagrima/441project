@@ -165,16 +165,17 @@ function moveOneDegree(motor, dir) {
 function setZero() {
     fetch("/set_zero", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify({})
     })
-    .then(res => res.json())
-    .then(data => {
-        document.getElementById("zeroStatus").textContent = data.status;
-        alert(data.status);
+    .then(res => {
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+        return res.json();
     })
+    .then(data => alert(data.status || data.error))
     .catch(err => alert("Error setting zero: " + err));
 }
+
 
 function goZero() {
     fetch("/go_zero", {
