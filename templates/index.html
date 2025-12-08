@@ -164,28 +164,39 @@ function moveOneDegree(motor, dir) {
     }).catch(err => console.log("Error moving motor:", err));
 }
 
-// ---------- MOVE TO ZERO ----------
+<!-- ---------- MOVE TO ZERO ---------- -->
+<script>
+// ---------- SET ZERO ----------
 function setZero() {
     fetch("/set_zero", {
         method: "POST",  // must be POST
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({})  // even empty JSON
+        body: JSON.stringify({})  // send empty JSON
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) throw new Error("HTTP error " + res.status);
+        return res.json();
+    })
     .then(data => alert(data.status))
     .catch(err => alert("Error setting zero: " + err));
 }
 
+// ---------- MOVE TO ZERO ----------
 function goZero() {
     fetch("/go_zero", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({})
+        body: JSON.stringify({})  // empty JSON
     })
-    .then(res => res.json())
-    .then(data => alert("Moved to zero"))
+    .then(res => {
+        if (!res.ok) throw new Error("HTTP error " + res.status);
+        return res.json();
+    })
+    .then(data => alert(data.status || "Moved to zero"))
     .catch(err => alert("Error moving to zero: " + err));
 }
+</script>
+
 
 // ---------- POPULATE MOVE DROPDOWN ----------
 function populateMoveDropdown(list) {
