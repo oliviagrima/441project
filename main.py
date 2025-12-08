@@ -5,8 +5,10 @@ import multiprocessing
 import RPi.GPIO as GPIO
 import time
 import json
+import math
 import requests
 import atexit
+import os
 
 app = Flask(__name__)
 
@@ -40,43 +42,10 @@ def cleanup_hardware():
 
 atexit.register(cleanup_hardware)
 
-"""delete later"""
-
-positions_data = {
-    "turrets": {
-        "1": {"r": 300.0, "theta": 1.5882496193148399},
-        "2": {"r": 300.0, "theta": 5.7246799465414},
-        "3": {"r": 300.0, "theta": 4.572762640225144},
-        "4": {"r": 300.0, "theta": 0.41887902047863906},
-        "5": {"r": 300.0, "theta": 0.017453292519943295},
-        "6": {"r": 300.0, "theta": 0.6981317007977318},
-        "7": {"r": 300.0, "theta": 5.794493116621174},
-        "8": {"r": 300.0, "theta": 3.211405823669566},
-        "9": {"r": 300.0, "theta": 5.8643062867009474},
-        "10": {"r": 300.0, "theta": 2.007128639793479},
-        "11": {"r": 300.0, "theta": 5.427973973702365},
-        "12": {"r": 300.0, "theta": 0.890117918517108},
-        "13": {"r": 300.0, "theta": 1.4835298641951802},
-        "14": {"r": 300.0, "theta": 3.385938748868999},
-        "15": {"r": 300.0, "theta": 0.7853981633974483},
-        "16": {"r": 300.0, "theta": 3.036872898470133},
-        "17": {"r": 300.0, "theta": 1.2915436464758039},
-        "18": {"r": 300.0, "theta": 1.117010721276371},
-        "19": {"r": 300.0, "theta": 0.017453292519943295},
-        "20": {"r": 300.0, "theta": 5.026548245743669}
-    },
-    "globes": [
-        {"r": 300.0, "theta": 3.385938748868999, "z": 103.0},
-        {"r": 300.0, "theta": 6.19591884457987, "z": 16.0},
-        {"r": 300.0, "theta": 1.2740903539558606, "z": 172.0},
-        {"r": 300.0, "theta": 0.8203047484373349, "z": 197.0},
-        {"r": 300.0, "theta": 5.654866776461628, "z": 90.0},
-        {"r": 300.0, "theta": 1.0297442586766543, "z": 35.0},
-        {"r": 300.0, "theta": 4.852015320544236, "z": 118.0},
-        {"r": 300.0, "theta": 1.902408884673819, "z": 139.0}
-    ]
-}
-
+def load_positions():
+    path = os.path.join(os.path.dirname(__file__), "positions.json")
+    with open(path, "r") as f:
+        return json.load(f)
 
 def read_tur_pos(url, id):
     """Download JSON and return turret position for given id."""
@@ -169,8 +138,6 @@ def my_turret():
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-import math
 """
 @app.route("/move_motor", methods=["POST"])
 def move_motor():
@@ -197,7 +164,6 @@ def move_motor():
 
 @app.route("/move_motor", methods=["POST"])
 def move_motor():
-    import math
 
     data = request.json
 
@@ -293,12 +259,9 @@ def move_motor():
         "motor2_z": dz
     })
 
-
-"""delete later"""
-
 @app.route("/positions.json")
 def positions():
-    return jsonify(positions_data)
+    return jsonify(load_positions())
 
 if __name__ == "__main__":
     try:
