@@ -156,16 +156,16 @@ def my_turret():
 def move_motor():
     data = request.json
 
-    # Manual move mode
+    # --- Manual movement (from buttons) ---
     if "phi" in data or "z" in data:
         try:
             phi = float(data.get("phi", 0))  # laser rotation
-            z = float(data.get("z", 0))
+            z = float(data.get("z", 0))      # vertical
         except:
             return jsonify({"error": "Invalid manual move inputs"}), 400
 
         if abs(phi) > 0:
-            m1.goAngle(m1.angle.value + phi, blocking=True)
+            m1.goAngle(m1.angle.value + phi, blocking=True)  # add relative rotation
         if abs(z) > 0:
             m2.goAngle(m2.angle.value + z, blocking=True)
 
@@ -175,7 +175,7 @@ def move_motor():
             "motor2_z": z
         })
 
-    # Target tracking mode
+    # --- Target tracking movement ---
     url = data.get("url")
     team = data.get("team")
     target_id = data.get("target_id")
@@ -189,7 +189,7 @@ def move_motor():
     if "error" in my_turret:
         return jsonify(my_turret), 400
 
-    r0 = my_turret["r"]       # turret radius
+    r0 = my_turret["r"]
     theta0 = my_turret["theta"]  # turret fixed angle
     z0 = 0
 
