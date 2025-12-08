@@ -43,6 +43,21 @@
     <button onmousedown="startManualMove('z', -1)" onmouseup="stopManualMove()" onmouseleave="stopManualMove()">▼</button>
     <button onmousedown="startManualMove('z', 1)" onmouseup="stopManualMove()" onmouseleave="stopManualMove()">▲</button>
 </div>
+
+<button onclick="setZero()">Set Zero Position</button>
+
+<script>
+function setZero() {
+    fetch("/set_zero", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({})
+    })
+    .then(res => res.json())
+    .then(data => alert(data.status))
+    .catch(err => alert("Error setting zero: " + err));
+}
+</script>
     
 <!-- TARGETS INFO: display only, no selection -->
 <div class="box">
