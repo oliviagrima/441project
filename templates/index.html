@@ -131,7 +131,6 @@ let manualInterval = null;
 let isManualActive = false;
 
 function startManualMove(motor, dir) {
-    if (!turretJsonUrl) return;
     if (manualInterval !== null || isManualActive) return;
 
     isManualActive = true;
@@ -143,21 +142,24 @@ function startManualMove(motor, dir) {
 }
 
 function stopManualMove() {
-    if (manualInterval) clearInterval(manualInterval);
-    manualInterval = null;
+    if (manualInterval) {
+        clearInterval(manualInterval);
+        manualInterval = null;
+    }
     isManualActive = false;
 }
 
 function moveOneDegree(motor, dir) {
-    let theta = 0;
+    let phi = 0;
     let z = 0;
-    if (motor === 'theta') theta = dir * (Math.PI / 180);
-    if (motor === 'z') z = dir * 1;
+
+    if (motor === 'theta') phi = dir * (Math.PI / 180);  // theta buttons now rotate laser
+    if (motor === 'z') z = dir * 1;                      // z buttons move vertically
 
     fetch("/move_motor", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({theta: theta, z: z})
+        body: JSON.stringify({phi: phi, z: z})
     }).catch(err => console.log("Error moving motor:", err));
 }
 
