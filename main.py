@@ -157,24 +157,21 @@ def move_motor():
     data = request.json
 
     # --- Manual movement (from buttons) ---
-    if "phi" in data or "z" in data:
-        try:
-            phi = float(data.get("phi", 0))  # laser rotation
-            z = float(data.get("z", 0))      # vertical
-        except:
-            return jsonify({"error": "Invalid manual move inputs"}), 400
+    # Use only z and phi if provided directly
+    phi_manual = float(data.get("phi", 0))  # for manual buttons
+    z_manual = float(data.get("z", 0))
 
-        if abs(phi) > 0:
-            m1.goAngle(m1.angle.value + phi, blocking=True)  # add relative rotation
-        if abs(z) > 0:
-            m2.goAngle(m2.angle.value + z, blocking=True)
-
+    if abs(phi_manual) > 0.001 or abs(z_manual) > 0.001:
+        if abs(phi_manual) > 0.001:
+            m1.goAngle(m1.angle.value + phi_manual, blocking=True)
+        if abs(z_manual) > 0.001:
+            m2.goAngle(m2.angle.value + z_manual, blocking=True)
         return jsonify({
             "status": "manual moving",
-            "motor1_phi": phi,
-            "motor2_z": z
+            "motor1_phi": phi_manual,
+            "motor2_z": z_manual
         })
-
+    
     # --- Target tracking movement ---
     url = data.get("url")
     team = data.get("team")
