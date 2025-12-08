@@ -264,10 +264,6 @@ def set_zero():
         "status": f"Zero set! theta0={theta_now:.2f}, z0={z_now:.2f}"
     })
 
-@app.route("/set_zero", methods=["GET"])
-def set_zero_get():
-    return jsonify({"error": "Use POST to set zero"}), 405
-
 @app.route("/go_zero", methods=["POST"])
 def go_zero():
     zero = load_zero()
