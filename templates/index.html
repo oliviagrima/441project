@@ -42,27 +42,11 @@
     <h3>Vertical (z)</h3>
     <button onmousedown="startManualMove('z', -1)" onmouseup="stopManualMove()" onmouseleave="stopManualMove()">▼</button>
     <button onmousedown="startManualMove('z', 1)" onmouseup="stopManualMove()" onmouseleave="stopManualMove()">▲</button>
-</div>
 
-<button onclick="setZero()">Set Zero Position</button>
-
-<script>
-function setZero() {
-    fetch("/set_zero", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({})
-    })
-    .then(res => res.json())
-    .then(data => alert(data.status))
-    .catch(err => alert("Error setting zero: " + err));
-}
-</script>
-
-<div class="box">
-    <h2>Return to Zero</h2>
-    <button onclick="goToZero()">Go to Zero</button>
-    <pre id="zeroStatus">Not moved yet</pre>
+    <h3>Zero Control</h3>
+    <button onclick="setZero()">Set Zero</button>
+    <button onclick="goZero()">Move to Zero</button>
+    <pre id="zeroStatus">Zero not set</pre>
 </div>
     
 <!-- TARGETS INFO: display only, no selection -->
@@ -86,8 +70,7 @@ function setZero() {
 </div>
 
 <script>
-// ---------- GLOBAL URL VARIABLE ----------
-let turretJsonUrl = null; // stores the JSON URL once set
+let turretJsonUrl = null;
 
 // ---------- SET JSON URL ----------
 function setJsonUrl() {
@@ -97,7 +80,7 @@ function setJsonUrl() {
     document.getElementById("urlStatus").textContent = "URL set: " + url;
 }
 
-// ---------- LOAD MY TURRET INFO ----------
+// ---------- LOAD MY TURRET ----------
 function loadMyTurret() {
     const team = document.getElementById("myTeamId").value;
     if (!turretJsonUrl) return alert("Set the JSON URL first!");
@@ -116,7 +99,7 @@ function loadMyTurret() {
     .catch(err => alert("Error: " + err));
 }
 
-// ---------- LOAD TARGETS INFO ----------
+// ---------- LOAD TARGETS ----------
 function loadTargets() {
     if (!turretJsonUrl) return alert("Set the JSON URL first!");
 
@@ -129,18 +112,15 @@ function loadTargets() {
     .then(data => {
         if (!data.targets) return alert("No targets found");
 
-        // Separate turrets and globes
         const turrets = data.targets.filter(t => t.type === "turret");
         const globes = data.targets.filter(t => t.type === "globe");
 
-        // Display info in their respective sections
         document.getElementById("turretInfo").textContent =
             turrets.map(t => `Turret ${t.id} — θ = ${t.theta.toFixed(3)}, r = ${t.r.toFixed(1)}`).join("\n");
 
         document.getElementById("globeInfo").textContent =
             globes.map((g, i) => `Globe ${i+1} — θ = ${g.theta.toFixed(3)}, r = ${g.r.toFixed(1)}, z = ${g.z}`).join("\n");
 
-        // Populate move dropdown with all targets
         const moveList = turrets.concat(globes);
         populateMoveDropdown(moveList);
     })
@@ -148,14 +128,14 @@ function loadTargets() {
 }
 
 let manualInterval = null;
-let isManualActive = false;  // new flag
+let isManualActive = false;
 
 function startManualMove(motor, dir) {
-    if (!turretJsonUrl) return;   // prevent calls if URL not set
+    if (!turretJsonUrl) return;
     if (manualInterval !== null || isManualActive) return;
 
     isManualActive = true;
-    moveOneDegree(motor, dir);  // initial step
+    moveOneDegree(motor, dir);
 
     manualInterval = setInterval(() => {
         moveOneDegree(motor, dir);
@@ -170,13 +150,12 @@ function stopManualMove() {
     isManualActive = false;
 }
 
-// move 1 degree (or more if needed)
 function moveOneDegree(motor, dir) {
     let theta = 0;
     let z = 0;
 
-    if (motor === 'theta') theta = dir * (Math.PI / 180); // convert 1 deg to rad
-    if (motor === 'z') z = dir * 1; // 1 cm step; adjust to your system
+    if (motor === 'theta') theta = dir * (Math.PI / 180);
+    if (motor === 'z') z = dir * 1;
 
     fetch("/move_motor", {
         method: "POST",
@@ -185,11 +164,28 @@ function moveOneDegree(motor, dir) {
     }).catch(err => console.log("Error moving motor:", err));
 }
 
+// ---------- MOVE TO ZERO ----------
+function setZero() {
+    fetch("/set_zero", {method: "POST"})
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("zeroStatus").textContent = data.status;
+    }).catch(err => alert("Error setting zero: " + err));
+}
+
+function goZero() {
+    fetch("/go_zero", {method: "POST"})
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("zeroStatus").textContent = "Moved to zero";
+    }).catch(err => alert("Error moving to zero: " + err));
+}
+
 // ---------- POPULATE MOVE DROPDOWN ----------
 function populateMoveDropdown(list) {
     const select = document.getElementById("moveSelect");
-    select.innerHTML = ""; // clear previous options
-    
+    select.innerHTML = "";
+
     let turretCount = 0;
     let globeCount = 0;
 
@@ -239,26 +235,6 @@ function moveToSelected() {
     .then(() => alert(`Moving turret to θ = ${theta}, r = ${r}` + (z !== undefined ? `, z = ${z}` : "")))
     .catch(err => alert("Error moving turret: " + err));
 }
-
-function goToZero() {
-    fetch("/go_zero", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" }
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.error) {
-            document.getElementById("zeroStatus").textContent = "Error: " + data.error;
-            return;
-        }
-        document.getElementById("zeroStatus").textContent =
-            `Returned to Zero\nθ₀ = ${data.theta_zero}\nz₀ = ${data.z_zero}`;
-    })
-    .catch(err => {
-        document.getElementById("zeroStatus").textContent = "Error: " + err;
-    });
-}
-
 </script>
 </body>
 </html>
