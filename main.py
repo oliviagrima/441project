@@ -156,29 +156,26 @@ def my_turret():
 def move_motor():
     data = request.json
 
-    # MANUAL MOVE MODE
-    if "theta" in data or "z" in data:
+    # Manual move mode
+    if "phi" in data or "z" in data:
         try:
-            theta_rad = float(data.get("theta", 0))
+            phi = float(data.get("phi", 0))  # laser rotation
             z = float(data.get("z", 0))
         except:
             return jsonify({"error": "Invalid manual move inputs"}), 400
 
-        delta_deg = math.degrees(theta_rad)
-
-        if delta_deg != 0:
-            zero = load_zero()
-            m1.goAngle(m1.angle.value + delta_deg, blocking=True)
-        if z != 0:
+        if abs(phi) > 0:
+            m1.goAngle(m1.angle.value + phi, blocking=True)
+        if abs(z) > 0:
             m2.goAngle(m2.angle.value + z, blocking=True)
 
         return jsonify({
             "status": "manual moving",
-            "motor1_theta_deg": delta_deg,
+            "motor1_phi": phi,
             "motor2_z": z
         })
 
-    # TARGET TRACKING MODE
+    # Target tracking mode
     url = data.get("url")
     team = data.get("team")
     target_id = data.get("target_id")
@@ -187,15 +184,16 @@ def move_motor():
     if not (url and team and target_id and target_type):
         return jsonify({"error": "Missing target move parameters"}), 400
 
-    # Get your turret position
+    # Load turret position
     my_turret = read_tur_pos(url, team)
     if "error" in my_turret:
         return jsonify(my_turret), 400
 
-    r0 = my_turret["r"]        # turret radius
-    theta0 = my_turret["theta"]  # turret arena angle in radians
+    r0 = my_turret["r"]       # turret radius
+    theta0 = my_turret["theta"]  # turret fixed angle
+    z0 = 0
 
-    # Get all targets
+    # Load targets
     targets_data = read_target_positions(url)
     if "error" in targets_data:
         return jsonify(targets_data), 400
@@ -214,40 +212,39 @@ def move_motor():
         return jsonify({"error": "Target not found"}), 400
 
     rt = target["r"]
-    theta_t = target["theta"]  # arena angle of target in radians
+    thetat = target["theta"]
     zt = target.get("z", 0)
 
-    # --- LAW OF COSINES ---
-    delta_theta = theta_t - theta0  # CCW difference
-    d = math.sqrt(r0**2 + rt**2 - 2*r0*rt*math.cos(delta_theta))  # distance turret→target
+    # Load zero offsets
+    zero = load_zero()  # expects {"phi0": ..., "z0": ...}
 
-    # Angle at turret
-    cos_phi = (r0**2 + d**2 - rt**2) / (2 * r0 * d)
-    # Clip in case of floating point errors
-    cos_phi = min(1.0, max(-1.0, cos_phi))
-    phi = math.acos(cos_phi)  # in radians
+    # Compute vector from turret to target
+    dx = rt * math.cos(thetat) - r0 * math.cos(theta0)
+    dy = rt * math.sin(thetat) - r0 * math.sin(theta0)
 
-    # Determine sign
-    if math.sin(delta_theta) > 0:
-        phi = -phi
+    # Vector from turret to center
+    dx_center = -r0 * math.cos(theta0)
+    dy_center = -r0 * math.sin(theta0)
 
-    # Apply zero offset
-    zero = load_zero()
-    actual_phi_deg = math.degrees(phi) + zero["theta0"]
-    actual_z = zt + zero["z0"]
+    # Angle between turret-to-center and turret-to-target
+    phi_target = math.atan2(dy, dx) - math.atan2(dy_center, dx_center)
+    phi_deg = math.degrees(phi_target) + zero.get("phi0", 0)
+
+    # Vertical movement
+    dz = zt - z0 + zero.get("z0", 0)
 
     # Move motors
-    if actual_phi_deg != 0:
-        m1.goAngle(m1.angle.value + actual_phi_deg, blocking=True)
-    if zt != 0:
-        m2.goAngle(m2.angle.value + actual_z, blocking=True)
+    if abs(phi_deg) > 0.01:
+        m1.goAngle(m1.angle.value + phi_deg, blocking=True)
+    if abs(dz) > 0.01:
+        m2.goAngle(m2.angle.value + dz, blocking=True)
 
     return jsonify({
         "status": "target moving",
-        "motor1_phi_deg": actual_phi_deg,
-        "motor2_z": actual_z
+        "motor1_phi_deg": phi_deg,
+        "motor2_z": dz
     })
-    
+
 @app.route("/set_zero", methods=["POST"])
 def set_zero():
     try:
