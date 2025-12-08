@@ -254,15 +254,13 @@ def move_motor():
 
 @app.route("/set_zero", methods=["POST"])
 def set_zero():
-    theta_now = m1.angle.value
-    z_now = m2.angle.value
-    phi_now = 0  # motor pointing toward center
-    save_zero(theta_now, z_now, phi_now)
-
-
-    return jsonify({
-        "status": f"Zero set! theta0={theta_now:.2f}, z0={z_now:.2f}"
-    })
+    try:
+        theta_now = m1.angle.value
+        z_now = m2.angle.value
+        save_zero(theta_now, z_now)
+        return jsonify({"status": f"Zero set! theta0={theta_now:.2f}, z0={z_now:.2f}"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/go_zero", methods=["POST"])
 def go_zero():
