@@ -49,7 +49,7 @@
     <pre id="zeroStatus">Zero not set</pre>
 </div>
 
-<!-- TARGETS INFO: display only, no selection -->
+<!-- TARGETS INFO: display only -->
 <div class="box">
     <h2>Targets</h2>
     <button onclick="loadTargets()">Load Targets</button>
@@ -61,7 +61,7 @@
     <pre id="globeInfo">Globes info will appear here</pre>
 </div>
 
-<!-- MOVE TURRET: single dropdown for selecting any target -->
+<!-- MOVE TURRET -->
 <div class="box">
     <h2>Move Turret</h2>
     <label>Select Target:</label><br>
@@ -121,12 +121,12 @@ function loadTargets() {
         document.getElementById("globeInfo").textContent =
             globes.map((g, i) => `Globe ${i+1} — θ = ${g.theta.toFixed(3)}, r = ${g.r.toFixed(1)}, z = ${g.z}`).join("\n");
 
-        const moveList = turrets.concat(globes);
-        populateMoveDropdown(moveList);
+        populateMoveDropdown(turrets.concat(globes));
     })
     .catch(err => alert("Error loading targets: " + err));
 }
 
+// ---------- MANUAL MOTOR CONTROL ----------
 let manualInterval = null;
 let isManualActive = false;
 
@@ -143,17 +143,14 @@ function startManualMove(motor, dir) {
 }
 
 function stopManualMove() {
-    if (manualInterval) {
-        clearInterval(manualInterval);
-        manualInterval = null;
-    }
+    if (manualInterval) clearInterval(manualInterval);
+    manualInterval = null;
     isManualActive = false;
 }
 
 function moveOneDegree(motor, dir) {
     let theta = 0;
     let z = 0;
-
     if (motor === 'theta') theta = dir * (Math.PI / 180);
     if (motor === 'z') z = dir * 1;
 
@@ -164,24 +161,22 @@ function moveOneDegree(motor, dir) {
     }).catch(err => console.log("Error moving motor:", err));
 }
 
-// ---------- MOVE TO ZERO ----------
+// ---------- ZERO CONTROL ----------
 function setZero() {
-    fetch("/set_zero", {method: "POST"})
     fetch("/set_zero", {
-        method: "POST",  // must be POST
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({})  // even empty JSON
+        body: JSON.stringify({})
     })
     .then(res => res.json())
     .then(data => {
         document.getElementById("zeroStatus").textContent = data.status;
-    }).catch(err => alert("Error setting zero: " + err));
-    .then(data => alert(data.status))
+        alert(data.status);
+    })
     .catch(err => alert("Error setting zero: " + err));
 }
 
 function goZero() {
-    fetch("/go_zero", {method: "POST"})
     fetch("/go_zero", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -190,45 +185,29 @@ function goZero() {
     .then(res => res.json())
     .then(data => {
         document.getElementById("zeroStatus").textContent = "Moved to zero";
-    }).catch(err => alert("Error moving to zero: " + err));
-    .then(data => alert("Moved to zero"))
+        alert("Moved to zero");
+    })
     .catch(err => alert("Error moving to zero: " + err));
 }
 
-// ---------- POPULATE MOVE DROPDOWN ----------
+// ---------- MOVE DROPDOWN ----------
 function populateMoveDropdown(list) {
     const select = document.getElementById("moveSelect");
     select.innerHTML = "";
-
-    let turretCount = 0;
-    let globeCount = 0;
+    let turretCount = 0, globeCount = 0;
 
     list.forEach((item) => {
-        let label;
-
-        if (item.type === "turret") {
-            turretCount++;
-            label = `Turret ${turretCount}`;
-        } else {
-            globeCount++;
-            label = `Globe ${globeCount}`;
-        }
-
+        let label = item.type === "turret" ? `Turret ${++turretCount}` : `Globe ${++globeCount}`;
         const option = document.createElement("option");
         option.value = item.theta;
-        option.textContent = label + " — θ = " + item.theta.toFixed(3) + ", r = " + item.r.toFixed(1);
-
+        option.textContent = `${label} — θ = ${item.theta.toFixed(3)}, r = ${item.r.toFixed(1)}`;
         option.dataset.r = item.r;
-
-        if (item.type === "globe" && item.z !== undefined) {
-            option.dataset.z = item.z;
-        }
-
+        if (item.type === "globe" && item.z !== undefined) option.dataset.z = item.z;
         select.appendChild(option);
     });
 }
 
-// ---------- MOVE TURRET TO SELECTED TARGET ----------
+// ---------- MOVE TO SELECTED ----------
 function moveToSelected() {
     const select = document.getElementById("moveSelect");
     const theta = parseFloat(select.value);
@@ -237,9 +216,7 @@ function moveToSelected() {
     const selectedIndex = select.selectedIndex;
     let z = select.options[selectedIndex].dataset.z;
     if (z !== undefined) z = parseFloat(z);
-
-    let r = select.options[selectedIndex].dataset.r;
-    if (r !== undefined) r = parseFloat(r);
+    let r = parseFloat(select.options[selectedIndex].dataset.r);
 
     fetch("/move_motor", {
         method: "POST",
