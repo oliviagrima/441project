@@ -58,6 +58,12 @@ function setZero() {
     .catch(err => alert("Error setting zero: " + err));
 }
 </script>
+
+<div class="box">
+    <h2>Return to Zero</h2>
+    <button onclick="goToZero()">Go to Zero</button>
+    <pre id="zeroStatus">Not moved yet</pre>
+</div>
     
 <!-- TARGETS INFO: display only, no selection -->
 <div class="box">
@@ -233,6 +239,26 @@ function moveToSelected() {
     .then(() => alert(`Moving turret to θ = ${theta}, r = ${r}` + (z !== undefined ? `, z = ${z}` : "")))
     .catch(err => alert("Error moving turret: " + err));
 }
+
+function goToZero() {
+    fetch("/go_zero", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            document.getElementById("zeroStatus").textContent = "Error: " + data.error;
+            return;
+        }
+        document.getElementById("zeroStatus").textContent =
+            `Returned to Zero\nθ₀ = ${data.theta_zero}\nz₀ = ${data.z_zero}`;
+    })
+    .catch(err => {
+        document.getElementById("zeroStatus").textContent = "Error: " + err;
+    });
+}
+
 </script>
 </body>
 </html>
