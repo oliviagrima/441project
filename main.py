@@ -47,6 +47,19 @@ def load_positions():
     with open(path, "r") as f:
         return json.load(f)
 
+ZERO_FILE = os.path.join(os.path.dirname(__file__), "zero.json")
+
+def load_zero():
+    try:
+        with open(ZERO_FILE, "r") as f:
+            return json.load(f)
+    except:
+        return {"theta0": 0, "z0": 0}
+
+def save_zero(theta0, z0):
+    with open(ZERO_FILE, "w") as f:
+        json.dump({"theta0": theta0, "z0": z0}, f, indent=4)
+
 def read_tur_pos(url, id):
     """Download JSON and return turret position for given id."""
     try:
@@ -178,7 +191,8 @@ def move_motor():
         delta_deg = math.degrees(theta_rad)
 
         if delta_deg != 0:
-            m1.goAngle(m1.angle.value + delta_deg, blocking=True)
+            zero = load_zero()
+            m1.goAngle((m1.angle.value + delta_deg), blocking=True)
         if z != 0:
             m2.goAngle(m2.angle.value + z, blocking=True)
 
@@ -247,16 +261,33 @@ def move_motor():
     # reverse if hardware direction flipped
     delta_deg = -delta_deg
 
+    zero = load_zero()
+    actual_target_angle = delta_deg + zero["theta0"]
+    actual_z = dz + zero["z0"]
+
     # --- move ---
     if delta_deg != 0:
-        m1.goAngle(m1.angle.value + delta_deg, blocking=True)
+        m1.goAngle(m1.angle.value + actual_target_angle, blocking=True)
     if dz != 0:
-        m2.goAngle(m2.angle.value + dz, blocking=True)
+        m2.goAngle(m2.angle.value + actual_z, blocking=True)
 
     return jsonify({
         "status": "target moving",
         "motor1_theta_deg": delta_deg,
         "motor2_z": dz
+    })
+
+@app.route("/set_zero", methods=["POST"])
+def set_zero():
+    # Read current motor angles
+    theta_now = m1.angle.value
+    z_now = m2.angle.value
+
+    # Save as zero reference
+    save_zero(theta_now, z_now)
+
+    return jsonify({
+        "status": f"Zero set! theta0={theta_now:.2f}, z0={z_now:.2f}"
     })
 
 @app.route("/positions.json")
