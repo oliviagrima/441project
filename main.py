@@ -151,29 +151,6 @@ def my_turret():
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-"""
-@app.route("/move_motor", methods=["POST"])
-def move_motor():
-    try:
-        theta_rad = float(request.json.get("theta", 0))
-        z = float(request.json.get("z", 0))
-    except Exception as e:
-        return jsonify({"error": f"Invalid input: {e}"}), 400
-
-    # Convert theta from radians → degrees
-    angle_theta = math.degrees(theta_rad)
-
-    if angle_theta != 0:
-        m1.goAngle(m1.angle.value + angle_theta, blocking=True)
-    if z != 0:
-        m2.goAngle(m2.angle.value + z, blocking=True)
-
-    return jsonify({
-        "status": "moving",
-        "motor1_theta": angle_theta,
-        "motor2_z": z
-    })
-"""
 
 @app.route("/move_motor", methods=["POST"])
 def move_motor():
@@ -259,16 +236,15 @@ def move_motor():
     delta_rad = (delta_rad + math.pi) % (2 * math.pi) - math.pi
     delta_deg = math.degrees(delta_rad)
 
-    # --- convert arena delta to motor φ using zero offsets ---
+    # --- phi conversion ---
     zero = load_zero()
-    phi = delta_deg + zero["theta0"]
-    actual_z = dz + zero["z0"]
-
-    # --- move motors ---
+    phi_target = zero.get("phi0", 0) - delta_deg  # arena θ → motor φ
+    actual_z = dz + zero.get("z0", 0)
+    
     if delta_deg != 0:
-        m1.goAngle(phi, blocking=True)
+        m1.goAngle(m1.angle.value + phi_target, blocking=True)
     if dz != 0:
-        m2.goAngle(actual_z, blocking=True)
+        m2.goAngle(m2.angle.value + actual_z, blocking=True)
 
     return jsonify({
         "status": "target moving",
@@ -278,12 +254,11 @@ def move_motor():
 
 @app.route("/set_zero", methods=["POST"])
 def set_zero():
-    # Read current motor angles
     theta_now = m1.angle.value
     z_now = m2.angle.value
+    phi_now = 0  # motor pointing toward center
+    save_zero(theta_now, z_now, phi_now)
 
-    # Save as zero reference
-    save_zero(theta_now, z_now)
 
     return jsonify({
         "status": f"Zero set! theta0={theta_now:.2f}, z0={z_now:.2f}"
@@ -291,24 +266,12 @@ def set_zero():
 
 @app.route("/go_zero", methods=["POST"])
 def go_zero():
-    # Load zero offsets
-    try:
-        with open("zero.json", "r") as f:
-            data = json.load(f)
-            zero_theta = data.get("theta_zero", 0)
-            zero_z = data.get("z_zero", 0)
-    except:
-        return jsonify({"error": "No zero position saved yet"}), 400
-
-    # Move motors to *absolute* zero
-    m1.goAngle(zero_theta, blocking=True)
-    m2.goAngle(zero_z, blocking=True)
-
-    return jsonify({
-        "status": "moved to zero",
-        "theta_zero": zero_theta,
-        "z_zero": zero_z
-    })
+    zero = load_zero()
+    phi_zero = zero.get("phi0", 0)
+    z_zero = zero.get("z0", 0)
+    m1.goAngle(phi_zero, blocking=True)
+    m2.goAngle(z_zero, blocking=True)
+    return jsonify({"status": "moved to zero", "phi_zero": phi_zero, "z_zero": z_zero})
 
 @app.route("/positions.json")
 def positions():
