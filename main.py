@@ -232,13 +232,14 @@ def move_motor():
     # Vertical movement
     dz = zt - z0 + zero.get("z0", 0)
 
-    z_cm_to_deg = dist * math.tan(5.625)      
+    cm_per_step = dist * math.tan(5.625)   
+    cm_per_deg = cm_per_step / 5.625
 
     # Move motors
     if abs(phi_deg) > 0.01:
         m1.goAngle(m1.angle.value + phi_deg, blocking=True)
     if abs(dz) > 0.01:
-        m2.goAngle(m2.angle.value + dz * z_cm_to_deg, blocking=True)
+        m2.goAngle(m2.angle.value + dz / cm_per_deg, blocking=True)
 
     return jsonify({
         "status": "target moving",
