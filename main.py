@@ -228,7 +228,7 @@ def move_motor():
     phi = math.acos(cos_phi)  # in radians
 
     # Determine sign
-    if math.sin(delta_theta) < 0:
+    if math.sin(delta_theta) > 0:
         phi = -phi
 
     # Apply zero offset
