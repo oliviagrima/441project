@@ -168,13 +168,19 @@ function moveOneDegree(motor, dir) {
 function populateMoveDropdown(list) {
     const select = document.getElementById("moveSelect");
     select.innerHTML = ""; // clear previous options
+    
+    let turretCount = 0;
+    let globeCount = 0;
 
-    list.forEach((item, i) => {
+    list.forEach((item) => {
         let label;
+
         if (item.type === "turret") {
-            label = `Turret ${item.id}`;
-        } else { // globe
-            label = `Globe ${i + 1}`;
+            turretCount++;
+            label = `Turret ${turretCount}`;
+        } else {
+            globeCount++;
+            label = `Globe ${globeCount}`;
         }
 
         const option = document.createElement("option");
