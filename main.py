@@ -192,7 +192,8 @@ def move_motor():
 
         if delta_deg != 0:
             zero = load_zero()
-            m1.goAngle((m1.angle.value + delta_deg), blocking=True)
+            # manual moves are relative to current motor position
+            m1.goAngle(m1.angle.value + delta_deg, blocking=True)
         if z != 0:
             m2.goAngle(m2.angle.value + z, blocking=True)
 
@@ -217,7 +218,7 @@ def move_motor():
         return jsonify(my_turret), 400
 
     r0 = my_turret["r"]
-    theta0 = my_turret["theta"]
+    theta0 = my_turret["theta"]  # arena angle of turret
     z0 = 0
 
     # --- get all targets ---
@@ -253,28 +254,26 @@ def move_motor():
     dz = zt - z0
 
     # --- compute rotation needed ---
-    target_angle = math.atan2(dy, dx)
+    target_angle = math.atan2(dy, dx)  # arena delta angle to target
     delta_rad = target_angle - theta0
     delta_rad = (delta_rad + math.pi) % (2 * math.pi) - math.pi
     delta_deg = math.degrees(delta_rad)
 
-    # reverse if hardware direction flipped
-    delta_deg = -delta_deg
-
+    # --- convert arena delta to motor φ using zero offsets ---
     zero = load_zero()
-    actual_target_angle = delta_deg + zero["theta0"]
+    phi = delta_deg + zero["theta0"]
     actual_z = dz + zero["z0"]
 
-    # --- move ---
+    # --- move motors ---
     if delta_deg != 0:
-        m1.goAngle(m1.angle.value + actual_target_angle, blocking=True)
+        m1.goAngle(phi, blocking=True)
     if dz != 0:
-        m2.goAngle(m2.angle.value + actual_z, blocking=True)
+        m2.goAngle(actual_z, blocking=True)
 
     return jsonify({
         "status": "target moving",
-        "motor1_theta_deg": delta_deg,
-        "motor2_z": dz
+        "motor1_phi_deg": phi,
+        "motor2_z": actual_z
     })
 
 @app.route("/set_zero", methods=["POST"])
