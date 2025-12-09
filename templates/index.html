@@ -15,7 +15,7 @@
 
 <h1>Turret Control</h1>
 
-<!-- JSON URL: set only once -->
+<!-- JSON URL: -->
 <div class="box">
     <h2>Set JSON URL</h2>
     <input id="jsonUrl" type="text" placeholder="Enter JSON URL"><br>
@@ -23,7 +23,7 @@
     <pre id="urlStatus">URL not set</pre>
 </div>
 
-<!-- MY TURRET: displays current turret info -->
+<!-- MY TURRET: -->
 <div class="box">
     <h2>My Turret</h2>
     <label>Team ID:</label><br>
@@ -49,7 +49,7 @@
     <pre id="zeroStatus">Zero not set</pre>
 </div>
 
-<!-- TARGETS INFO: display only -->
+<!-- TARGETS INFO: -->
 <div class="box">
     <h2>Targets</h2>
     <button onclick="loadTargets()">Load Targets</button>
@@ -67,6 +67,14 @@
     <label>Select Target:</label><br>
     <select id="moveSelect"></select><br>
     <button onclick="moveToSelected()">Move to Target</button>
+</div>
+
+<!-- LED CONTROL -->
+<div class="box">
+    <h2>LED Control</h2>
+    <button onclick="ledOn()">Turn LED On</button>
+    <button onclick="ledOff()">Turn LED Off</button>
+    <pre id="ledStatus">LED is OFF</pre>
 </div>
 
 <script>
@@ -254,6 +262,25 @@ function moveToSelected() {
     })
     .catch(err => alert("Error loading my turret info: " + err));
 }
+
+function ledOn() {
+    fetch("/led_on", { method: "POST" })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("ledStatus").textContent = data.status;
+    })
+    .catch(err => alert("Error turning LED on: " + err));
+}
+
+function ledOff() {
+    fetch("/led_off", { method: "POST" })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("ledStatus").textContent = data.status;
+    })
+    .catch(err => alert("Error turning LED off: " + err));
+}
+    
 </script>
 </body>
 </html>
