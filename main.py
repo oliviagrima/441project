@@ -227,7 +227,7 @@ def move_motor():
 
     # Angle between turret-to-center and turret-to-target
     phi_target = math.atan2(dy, dx) - math.atan2(dy_center, dx_center)
-    phi_deg = math.degrees(phi_target) + zero.get("phi0", 0)
+    phi_deg = math.degrees(phi_target) - zero.get("phi0", 0)
 
     # Vertical movement
     dz = zt - z0 + zero.get("z0", 0)
