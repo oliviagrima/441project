@@ -19,6 +19,8 @@ m2 = None
 lock1 = multiprocessing.Lock()
 lock2 = multiprocessing.Lock()
 
+led=26
+
 # Initialize hardware safely
 def init_hardware():
     global s, m1, m2
@@ -26,6 +28,10 @@ def init_hardware():
         GPIO.setwarnings(False)
         GPIO.cleanup()  # free any leftover pins from previous runs
         GPIO.setmode(GPIO.BCM)
+
+        GPIO.setup(led, GPIO.OUT)
+        GPIO.output(led, GPIO.LOW) 
+        
         s = Shifter(data=16, latch=20,clock=21 )
         m1 = Stepper(s, lock1)
         m2 = Stepper(s, lock2)
@@ -269,6 +275,16 @@ def go_zero():
 @app.route("/positions.json")
 def positions():
     return jsonify(load_positions())
+
+@app.route("/led_on", methods=["POST"])
+def led_on():
+    GPIO.output(led, GPIO.HIGH)
+    return jsonify({"status": "LED ON"})
+
+@app.route("/led_off", methods=["POST"])
+def led_off():
+    GPIO.output(led, GPIO.LOW)
+    return jsonify({"status": "LED OFF"})
 
 if __name__ == "__main__":
     try:
