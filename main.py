@@ -174,8 +174,8 @@ def move_motor():
             m2.goAngle(m2.angle.value + z_manual, blocking=True)
         return jsonify({
             "status": "manual moving",
-            "motor1_phi": phi_manual,
-            "motor2_z": z_manual
+            "motor1_phi_deg": phi_manual,
+            "motor2_elev_angle_deg": z_manual
         })
 
     # --- Target tracking movement ---
