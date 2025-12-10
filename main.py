@@ -175,8 +175,7 @@ def move_motor():
         return jsonify({
             "status": "manual moving",
             "motor1_phi_deg": phi_manual,
-            "motor2_elev_angle_deg": z_manual,
-            "dist": z_manual
+            "motor2_elev_angle_deg": z_manual
         })
 
     # --- Target tracking movement ---
@@ -222,12 +221,10 @@ def move_motor():
     # Load zero offsets
     zero = load_zero()  # expects {"phi0": ..., "z0": ...}
 
-    dist = math.sqrt(rt**2 + r0**2 - 2 * rt * r0 * math.cos(abs(thetat-theta0)))
-    print("Computed dist =", dist)
-
     # Compute vector from turret to target
     dx = rt * math.cos(thetat) - r0 * math.cos(theta0)
     dy = rt * math.sin(thetat) - r0 * math.sin(theta0)
+    dist = sqrt(dx*dx + dy*dy)
 
     # Vector from turret to center
     dx_center = -r0 * math.cos(theta0)
@@ -238,7 +235,7 @@ def move_motor():
     phi_deg = math.degrees(phi_target) - zero.get("phi0", 0)
 
     # Vertical movement
-    dz = zt - z0 + zero.get("z0", 0)
+    dz = zt - z0
     z_deg = math.degrees(math.atan2(dz, dist))
 
     # Move motors
@@ -251,7 +248,6 @@ def move_motor():
         "status": "target moving",
         "motor1_phi_deg": phi_deg,          # horizontal angle
         "motor2_elev_angle_deg": z_deg,      # vertical elevation angle
-        "dist": dist
     })
 
 @app.route("/set_zero", methods=["POST"])
