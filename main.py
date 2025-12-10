@@ -238,7 +238,15 @@ def move_motor():
     dz = zt - z0
     z_deg = math.degrees(math.atan2(dz, dist))
 
-    print(f"DEBUG dx={dx:.6f}, dy={dy:.6f}, dist={dist:.6f}, dz={dz:.6f}, z_deg={z_deg:.6f}")
+    # --- inside move_motor, just before moving motors ---
+    print("=== DEBUG MOVE_MOTOR ===", flush=True)
+    print(f"Turret: theta0={theta0}, r0={r0}", flush=True)
+    print(f"Target: thetat={thetat}, rt={rt}, zt={zt}", flush=True)
+    print(f"dx={dx}, dy={dy}, dist={dist}", flush=True)
+    print(f"phi_deg={phi_deg}", flush=True)
+    print(f"dz={dz}, z_deg={z_deg}", flush=True)
+    print("========================", flush=True)
+
 
     # Move motors
     if abs(phi_deg) > 0.01:
