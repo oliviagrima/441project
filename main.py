@@ -175,7 +175,7 @@ def move_motor():
         return jsonify({
             "status": "manual moving",
             "motor1_phi_deg": phi_manual,
-            "motor2_elev_angle_deg": z_manual
+            "motor2_elev_angle_deg": z_manual,
             "dist": z_manual
         })
 
