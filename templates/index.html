@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -215,9 +216,6 @@ function populateMoveDropdown(list) {
         const option = document.createElement("option");
         option.value = item.theta;
         option.textContent = `${label} — θ = ${item.theta.toFixed(3)}, r = ${item.r.toFixed(1)}`;
-
-        option.dataset.id = item.id || null; 
-        
         option.dataset.r = item.r;
         if (item.type === "globe" && item.z !== undefined) option.dataset.z = item.z;
         select.appendChild(option);
@@ -265,16 +263,9 @@ function moveToSelected() {
         fetch("/move_motor", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({
-                url: turretJsonUrl,
-                team: teamId,
-                target_id: select.options[selectedIndex].dataset.id,
-                target_type: (z === undefined ? "turret" : "globe"),
-                phi: phi,
-                z: z
-            })
+            body: JSON.stringify({phi: phi, z: z})
         })
-        .then(res => res.json())
+        .then(res => res.json())  
         .then(data => {
             alert(`Moving turret to φ = ${data.motor1_phi_deg.toFixed(2)}°, elevation = ${data.motor2_elev_angle_deg.toFixed(2)}°`);
         })
