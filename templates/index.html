@@ -224,30 +224,54 @@ function populateMoveDropdown(list) {
 // ---------- MOVE TO SELECTED ----------
 function moveToSelected() {
     const select = document.getElementById("moveSelect");
-    const targetTheta = parseFloat(select.value);
-    const targetId = select.selectedIndex; // optional if you store ID
-    const targetType = select.options[select.selectedIndex].dataset.type;
+    const theta_arena = parseFloat(select.value); // target angle in arena
+    if (!theta_arena) return alert("Select a target!");
 
+    const selectedIndex = select.selectedIndex;
+    let z = select.options[selectedIndex].dataset.z;
+    if (z !== undefined) z = parseFloat(z);
+    let r_target = parseFloat(select.options[selectedIndex].dataset.r);
+
+    // My turret info
     const teamId = document.getElementById("myTeamId").value;
     if (!teamId) return alert("Enter your Team ID!");
 
-    fetch("/move_motor", {
+    fetch("/my_turret", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-            url: turretJsonUrl,
-            team: teamId,
-            target_id: targetTheta,   // or proper ID
-            target_type: targetType
-        })
+        body: JSON.stringify({url: turretJsonUrl, team: teamId})
     })
     .then(res => res.json())
-    .then(data => {
-        alert(`Moving turret to φ = ${data.motor1_phi_deg.toFixed(2)}°, elevation = ${data.motor2_elev_angle_deg.toFixed(2)}°`);
-    })
-    .catch(err => alert("Error moving turret: " + err));
-}
+    .then(myTurret => {
+        const r0 = myTurret.r;
+        const theta0 = myTurret.theta;
 
+        // Law of cosines: compute phi to point at target
+        const dx = r_target * Math.cos(theta_arena) - r0 * Math.cos(theta0);
+        const dy = r_target * Math.sin(theta_arena) - r0 * Math.sin(theta0);
+        const dx_center = -r0 * Math.cos(theta0);
+        const dy_center = -r0 * Math.sin(theta0);
+
+        let phi = Math.atan2(dy, dx) - Math.atan2(dy_center, dx_center);
+        phi = phi * 180 / Math.PI;  // convert to degrees
+
+        dist = Math.sqrt(r0 * r0 + r_target * r_target - 2 * r0 * r_target * Math.cos(Math.abs(theta_arena-theta0)));
+        dz = z - 0;
+        z = Math.atan2(dz, dist) * 180 / Math.PI;
+
+        fetch("/move_motor", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({phi: phi, z: z})
+        })
+        .then(res => res.json())  
+        .then(data => {
+            alert(`Moving turret to φ = ${data.motor1_phi_deg.toFixed(2)}°, elevation = ${data.motor2_elev_angle_deg.toFixed(2)}°`);
+        })
+        .catch(err => alert("Error moving turret: " + err));
+    })
+    .catch(err => alert("Error loading my turret info: " + err));
+}
 
 function ledOn() {
     fetch("/led_on", { method: "POST" })
@@ -266,7 +290,7 @@ function ledOff() {
     })
     .catch(err => alert("Error turning LED off: " + err));
 }
-    
+
 </script>
 </body>
 </html>
