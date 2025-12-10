@@ -230,7 +230,7 @@ function moveToSelected() {
 
     const selectedIndex = select.selectedIndex;
     let z = select.options[selectedIndex].dataset.z;
-    if (z !== undefined) z = parseFloat(z);
+    z = (z !== undefined) ? parseFloat(z) : 0;  // default to 0 if z not given
     let r_target = parseFloat(select.options[selectedIndex].dataset.r);
 
     // My turret info
