@@ -261,7 +261,7 @@ function moveToSelected() {
         fetch("/move_motor", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({phi: phi, z: z_deg})
+            body: JSON.stringify({phi: phi, z: z})
         })
         .then(() => alert(`Moving turret to φ = ${phi.toFixed(2)}°, z = ${z_deg}`))
         .catch(err => alert("Error moving turret: " + err));
