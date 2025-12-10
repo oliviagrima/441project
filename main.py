@@ -249,7 +249,7 @@ def move_motor():
     return jsonify({
         "status": "target moving",
         "motor1_phi_deg": phi_deg,          # horizontal angle
-        "motor2_elev_angle_deg": z_deg      # vertical elevation angle
+        "motor2_elev_angle_deg": z_deg,      # vertical elevation angle
         "dist": dist
     })
 
