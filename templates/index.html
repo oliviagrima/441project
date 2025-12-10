@@ -262,7 +262,7 @@ function moveToSelected() {
         })
         .then(res => res.json())  
         .then(data => {
-            alert(`Moving turret to φ = ${data.motor1_phi_deg.toFixed(2)}°, z = ${data.motor2_z.toFixed(2)}`);
+            alert(`Moving turret to φ = ${data.motor1_phi_deg.toFixed(2)}°, elevation = ${data.motor2_elev_angle_deg.toFixed(2)}°`);
         })
         .catch(err => alert("Error moving turret: " + err));
     })
