@@ -224,7 +224,7 @@ def move_motor():
     # Compute vector from turret to target
     dx = rt * math.cos(thetat) - r0 * math.cos(theta0)
     dy = rt * math.sin(thetat) - r0 * math.sin(theta0)
-    dist = sqrt(dx*dx + dy*dy)
+    dist = math.sqrt(dx*dx + dy*dy)
 
     # Vector from turret to center
     dx_center = -r0 * math.cos(theta0)
@@ -237,6 +237,8 @@ def move_motor():
     # Vertical movement
     dz = zt - z0
     z_deg = math.degrees(math.atan2(dz, dist))
+
+    print(f"DEBUG dx={dx:.6f}, dy={dy:.6f}, dist={dist:.6f}, dz={dz:.6f}, z_deg={z_deg:.6f}")
 
     # Move motors
     if abs(phi_deg) > 0.01:
