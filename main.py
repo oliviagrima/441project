@@ -173,10 +173,11 @@ def move_motor():
         if abs(z_manual) > 0.001:
             m2.goAngle(m2.angle.value + z_manual, blocking=True)
         return jsonify({
-            "status": "manual moving",
-            "motor1_phi": phi_manual,
-            "motor2_z": z_manual
+            "status": "target moving",
+            "motor1_phi_deg": phi_deg,          # horizontal angle
+            "motor2_elev_angle_deg": z_deg      # vertical elevation angle
         })
+
     
     # --- Target tracking movement ---
     url = data.get("url")
