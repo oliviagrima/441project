@@ -268,7 +268,7 @@ function moveToSelected() {
             body: JSON.stringify({
                 url: turretJsonUrl,
                 team: teamId,
-                target_id: selectedIndex,
+                target_id: select.options[selectedIndex].dataset.id,
                 target_type: (z === undefined ? "turret" : "globe"),
                 phi: phi,
                 z: z
