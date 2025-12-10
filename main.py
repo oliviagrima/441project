@@ -31,7 +31,7 @@ def init_hardware():
 
         GPIO.setup(led, GPIO.OUT)
         GPIO.output(led, GPIO.LOW) 
-        
+
         s = Shifter(data=16, latch=20,clock=21 )
         m1 = Stepper(s, lock1)
         m2 = Stepper(s, lock2)
@@ -173,12 +173,11 @@ def move_motor():
         if abs(z_manual) > 0.001:
             m2.goAngle(m2.angle.value + z_manual, blocking=True)
         return jsonify({
-            "status": "target moving",
-            "motor1_phi_deg": phi_deg,          # horizontal angle
-            "motor2_elev_angle_deg": z_deg      # vertical elevation angle
+            "status": "manual moving",
+            "motor1_phi": phi_manual,
+            "motor2_z": z_manual
         })
 
-    
     # --- Target tracking movement ---
     url = data.get("url")
     team = data.get("team")
@@ -243,13 +242,14 @@ def move_motor():
     # Move motors
     if abs(phi_deg) > 0.01:
         m1.goAngle(m1.angle.value + phi_deg, blocking=True)
+    if abs(dz) > 0.01:
     if abs(z_deg) > 0.01:
         m2.goAngle(m2.angle.value + z_deg, blocking=True)
 
     return jsonify({
         "status": "target moving",
-        "motor1_phi_deg": phi_deg,
-        "motor2_z": z_deg
+        "motor1_phi_deg": phi_deg,          # horizontal angle
+        "motor2_elev_angle_deg": z_deg      # vertical elevation angle
     })
 
 @app.route("/set_zero", methods=["POST"])
