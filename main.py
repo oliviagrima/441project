@@ -248,7 +248,7 @@ def move_motor():
     return jsonify({
         "status": "target moving",
         "motor1_phi_deg": phi_deg,
-        "motor2_z": dz
+        "motor2_z": z_deg
     })
 
 @app.route("/set_zero", methods=["POST"])
