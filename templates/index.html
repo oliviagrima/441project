@@ -255,7 +255,7 @@ function moveToSelected() {
         let phi = Math.atan2(dy, dx) - Math.atan2(dy_center, dx_center);
         phi = phi * 180 / Math.PI;  // convert to degrees
 
-        dist = Math.sqrt(r0 * r0 + r_target * r_target - 2 * r0 * r_target * Math.cos(Math.abs(theta_arena-theta0)));
+        dist = Math.sqrt(dx * dx + dy * dy);
         dz = z - 0;
         z = Math.atan2(dz, dist) * 180 / Math.PI;
 
