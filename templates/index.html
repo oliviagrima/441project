@@ -266,14 +266,15 @@ function moveToSelected() {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({
-            url: turretJsonUrl,
-            team: teamId,
-            target_id: selectedIndex,       // OR item.id for turrets
-            target_type: (z === undefined ? "turret" : "globe"),
-            phi: phi,
-            z: z
+                url: turretJsonUrl,
+                team: teamId,
+                target_id: selectedIndex,
+                target_type: (z === undefined ? "turret" : "globe"),
+                phi: phi,
+                z: z
+            })
         })
-        .then(res => res.json())  
+        .then(res => res.json())
         .then(data => {
             alert(`Moving turret to φ = ${data.motor1_phi_deg.toFixed(2)}°, elevation = ${data.motor2_elev_angle_deg.toFixed(2)}°`);
         })
