@@ -253,7 +253,7 @@ def move_motor():
     if abs(phi_deg) > 0.01:
         m1.goAngle(m1.angle.value + phi_deg, blocking=True)
     if abs(z_deg) > 0.01:
-        m2.goAngle(z_deg, blocking=True)
+        m2.goAngle(m2.angle.value + z_deg, blocking=True)
 
     return jsonify({
         "status": "target moving",
