@@ -222,7 +222,7 @@ def move_motor():
     # Load zero offsets
     zero = load_zero()  # expects {"phi0": ..., "z0": ...}
 
-    dist = sqrt(rt**2 + r0**2 - 2 * rt * r0 * math.cos(abs(thetat-theta0)))
+    dist = math.sqrt(rt**2 + r0**2 - 2 * rt * r0 * math.cos(abs(thetat-theta0)))
     print("Computed dist =", dist)
 
     # Compute vector from turret to target
