@@ -260,7 +260,7 @@ function moveToSelected() {
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({phi: phi, z: z})
         })
-        .then(() => alert(`Moving turret to φ = ${phi.toFixed(2)}°, z = ${z}`))
+        .then(() => alert(`Moving turret to φ = ${data.motor1_phi_deg.toFixed(2)}°, z = ${data.motor2_z.toFixed(2)}`))
         .catch(err => alert("Error moving turret: " + err));
     })
     .catch(err => alert("Error loading my turret info: " + err));
