@@ -15,6 +15,7 @@
 
 <h1>Turret Control</h1>
 
+<!-- JSON URL: set only once -->
 <!-- JSON URL: -->
 <div class="box">
     <h2>Set JSON URL</h2>
@@ -23,6 +24,7 @@
     <pre id="urlStatus">URL not set</pre>
 </div>
 
+<!-- MY TURRET: displays current turret info -->
 <!-- MY TURRET: -->
 <div class="box">
     <h2>My Turret</h2>
@@ -49,6 +51,7 @@
     <pre id="zeroStatus">Zero not set</pre>
 </div>
 
+<!-- TARGETS INFO: display only -->
 <!-- TARGETS INFO: -->
 <div class="box">
     <h2>Targets</h2>
@@ -243,8 +246,6 @@ function moveToSelected() {
         const r0 = myTurret.r;
         const theta0 = myTurret.theta;
 
-        dist = sqrt(r_target**2 + r0**2 - 2 * r_target * r0 * math.cos(abs(thetat_arena-theta0)))
-
         // Law of cosines: compute phi to point at target
         const dx = r_target * Math.cos(theta_arena) - r0 * Math.cos(theta0);
         const dy = r_target * Math.sin(theta_arena) - r0 * Math.sin(theta0);
@@ -254,16 +255,12 @@ function moveToSelected() {
         let phi = Math.atan2(dy, dx) - Math.atan2(dy_center, dx_center);
         phi = phi * 180 / Math.PI;  // convert to degrees
 
-        z0 = 0
-        dz = z - z0
-        z_deg = math.degrees(math.atan2(dz, dist))
-
         fetch("/move_motor", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({phi: phi, z: z})
         })
-        .then(() => alert(`Moving turret to φ = ${phi.toFixed(2)}°, z = ${z_deg}`))
+        .then(() => alert(`Moving turret to φ = ${phi.toFixed(2)}°, z = ${z}`))
         .catch(err => alert("Error moving turret: " + err));
     })
     .catch(err => alert("Error loading my turret info: " + err));
