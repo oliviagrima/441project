@@ -163,7 +163,8 @@ def move_motor():
     data = request.json
 
     # --- Manual movement (from buttons) ---
-    phi_manual = float(data.get("phi", 0))
+    # Use only z and phi if provided directly
+    phi_manual = float(data.get("phi", 0))  # for manual buttons
     z_manual = float(data.get("z", 0))
 
     if abs(phi_manual) > 0.001 or abs(z_manual) > 0.001:
@@ -186,15 +187,19 @@ def move_motor():
     if not (url and team and target_id and target_type):
         return jsonify({"error": "Missing target move parameters"}), 400
 
-    # Load turret and targets
+    # Load turret position
     my_turret = read_tur_pos(url, team)
-    if "error" in my_turret: return jsonify(my_turret), 400
-    r0 = my_turret["r"]
-    theta0 = my_turret["theta"]
-    z0 = 0  # base z
+    if "error" in my_turret:
+        return jsonify(my_turret), 400
 
+    r0 = my_turret["r"]
+    theta0 = my_turret["theta"]  # turret fixed angle
+    z0 = 0
+
+    # Load targets
     targets_data = read_target_positions(url)
-    if "error" in targets_data: return jsonify(targets_data), 400
+    if "error" in targets_data:
+        return jsonify(targets_data), 400
 
     # Find target
     target = None
@@ -205,37 +210,55 @@ def move_motor():
         if target_type == "globe" and t.get("theta") == float(target_id):
             target = t
             break
-    if not target: return jsonify({"error": "Target not found"}), 400
+
+    if not target:
+        return jsonify({"error": "Target not found"}), 400
 
     rt = target["r"]
     thetat = target["theta"]
     zt = target.get("z", 0)
 
-    # Compute horizontal vector and distance
+    # Load zero offsets
+    zero = load_zero()  # expects {"phi0": ..., "z0": ...}
+
+    # Compute vector from turret to target
     dx = rt * math.cos(thetat) - r0 * math.cos(theta0)
     dy = rt * math.sin(thetat) - r0 * math.sin(theta0)
-    dist_xy = math.sqrt(dx*dx + dy*dy)
+    dist = math.sqrt(dx*dx + dy*dy)
 
-    # Horizontal angle (phi)
+    # Vector from turret to center
     dx_center = -r0 * math.cos(theta0)
     dy_center = -r0 * math.sin(theta0)
-    phi_target = math.atan2(dy, dx) - math.atan2(dy_center, dx_center)
-    phi_deg = math.degrees(phi_target)
 
-    # Vertical angle (elevation)
+    # Angle between turret-to-center and turret-to-target
+    phi_target = math.atan2(dy, dx) - math.atan2(dy_center, dx_center)
+    phi_deg = math.degrees(phi_target) - zero.get("phi0", 0)
+
+    # Vertical movement
     dz = zt - z0
-    z_deg = math.degrees(math.atan2(dz, dist_xy))
+    z_deg = math.degrees(math.atan2(dz, dist))
+
+    print(f"DEBUG dx={dx:.6f}, dy={dy:.6f}, dist={dist:.6f}, dz={dz:.6f}, z_deg={z_deg:.6f}")
+    # --- inside move_motor, just before moving motors ---
+    print("=== DEBUG MOVE_MOTOR ===", flush=True)
+    print(f"Turret: theta0={theta0}, r0={r0}", flush=True)
+    print(f"Target: thetat={thetat}, rt={rt}, zt={zt}", flush=True)
+    print(f"dx={dx}, dy={dy}, dist={dist}", flush=True)
+    print(f"phi_deg={phi_deg}", flush=True)
+    print(f"dz={dz}, z_deg={z_deg}", flush=True)
+    print("========================", flush=True)
+
 
     # Move motors
-    if abs(phi_deg) > 0.01: m1.goAngle(m1.angle.value + phi_deg, blocking=True)
-    if abs(z_deg) > 0.01: m2.goAngle(m2.angle.value + z_deg, blocking=True)
+    if abs(phi_deg) > 0.01:
+        m1.goAngle(m1.angle.value + phi_deg, blocking=True)
+    if abs(z_deg) > 0.01:
+        m2.goAngle(m2.angle.value + z_deg, blocking=True)
 
     return jsonify({
         "status": "target moving",
-        "motor1_phi_deg": phi_deg,
-        "motor2_elev_angle_deg": z_deg,
-        "dist_xy": dist_xy,
-        "dz": dz
+        "motor1_phi_deg": phi_deg,          # horizontal angle
+        "motor2_elev_angle_deg": z_deg,      # vertical elevation angle
     })
 
 @app.route("/set_zero", methods=["POST"])
