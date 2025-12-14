@@ -209,15 +209,32 @@ function goZero() {
 function populateMoveDropdown(list) {
     const select = document.getElementById("moveSelect");
     select.innerHTML = "";
-    let turretCount = 0, globeCount = 0;
 
-    list.forEach((item) => {
-        let label = item.type === "turret" ? `Turret ${++turretCount}` : `Globe ${++globeCount}`;
+    // Separate + sort
+    const turrets = list
+        .filter(item => item.type === "turret")
+        .sort((a, b) => a.id - b.id);
+
+    const globes = list.filter(item => item.type === "globe");
+
+    // ---- Turrets ----
+    turrets.forEach(item => {
         const option = document.createElement("option");
         option.value = item.theta;
-        option.textContent = `${label} — θ = ${item.theta.toFixed(3)}, r = ${item.r.toFixed(1)}`;
+        option.textContent =
+            `Turret ${item.id} — θ = ${item.theta.toFixed(3)}, r = ${item.r.toFixed(1)}`;
         option.dataset.r = item.r;
-        if (item.type === "globe" && item.z !== undefined) option.dataset.z = item.z;
+        select.appendChild(option);
+    });
+
+    // ---- Globes ----
+    globes.forEach((item, i) => {
+        const option = document.createElement("option");
+        option.value = item.theta;
+        option.textContent =
+            `Globe ${i + 1} — θ = ${item.theta.toFixed(3)}, r = ${item.r.toFixed(1)}`;
+        option.dataset.r = item.r;
+        if (item.z !== undefined) option.dataset.z = item.z;
         select.appendChild(option);
     });
 }
