@@ -236,7 +236,7 @@ def move_motor():
 
     # Vertical movement
     dz = zt - z0
-    z_deg = math.degrees(math.atan2(dz, dist)) - zero.get("z0", 0)
+    z_deg = math.degrees(math.atan2(dz, dist)) 
 
     print(f"DEBUG dx={dx:.6f}, dy={dy:.6f}, dist={dist:.6f}, dz={dz:.6f}, z_deg={z_deg:.6f}")
     # --- inside move_motor, just before moving motors ---
