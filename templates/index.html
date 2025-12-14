@@ -253,7 +253,7 @@ function moveToSelected() {
 
     // Determine target type
     const targetType = selectedOption.dataset.z !== undefined ? "globe" : "turret";
-    const targetId = targetType === "turret" ? selectedOption.value : selectedIndex;
+    const targetId = targetType === "turret" ? selectedOption.value : selectedOption.value;
 
     // My turret info
     const teamId = document.getElementById("myTeamId").value;
