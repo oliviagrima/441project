@@ -236,7 +236,7 @@ function populateMoveDropdown(list) {
         const option = document.createElement("option");
         option.value = item.theta;
         option.textContent =
-            `Globe ${i + 1} — θ = ${item.theta.toFixed(3)}, r = ${item.r.toFixed(1)}`;
+            `Globe ${i + 1} — θ = ${item.theta.toFixed(3)}, r = ${item.r.toFixed(1)}, z = ${item.z}`;
         option.dataset.r = item.r;
         if (item.z !== undefined) option.dataset.z = item.z;
         select.appendChild(option);
