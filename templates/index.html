@@ -124,8 +124,12 @@ function loadTargets() {
     .then(data => {
         if (!data.targets) return alert("No targets found");
 
-        const turrets = data.targets.filter(t => t.type === "turret");
-        const globes = data.targets.filter(t => t.type === "globe");
+        const turrets = data.targets
+            .filter(t => t.type === "turret")
+            .sort((a, b) => a.id - b.id);
+        const globes = data.targets
+            .filter(t => t.type === "globe")
+            .sort((a, b) => a.id - b.id);
 
         document.getElementById("turretInfo").textContent =
             turrets.map(t => `Turret ${t.id} — θ = ${t.theta.toFixed(3)}, r = ${t.r.toFixed(1)}`).join("\n");
