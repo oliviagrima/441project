@@ -236,7 +236,7 @@ def move_motor():
 
     # Vertical movement
     dz = zt - z0
-    z_deg = math.degrees(math.atan2(dz, dist)) 
+    z_deg = (math.degrees(math.atan2(dz, dist))) / 2.8125
 
     # Move motors
     if abs(phi_deg) > 0.01:
