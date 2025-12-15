@@ -194,7 +194,7 @@ def move_motor():
 
     r0 = my_turret["r"]
     theta0 = my_turret["theta"]  # turret fixed angle
-    zo = 7.25
+    zo = 7.7
 
     # Load targets
     targets_data = read_target_positions(url)
