@@ -81,6 +81,12 @@
     <pre id="ledStatus">LED is OFF</pre>
 </div>
 
+<div class="box">
+    <h2>Read Current Motor Angles</h2>
+    <button onclick="showCurrentAngles()">Show Current Angles</button>
+    <pre id="currentAngles">Angles will appear here</pre>
+</div>
+
 <script>
 let turretJsonUrl = null;
 
@@ -296,6 +302,17 @@ function ledOff() {
     .catch(err => alert("Error turning LED off: " + err));
 }
 
+function showCurrentAngles() {
+    fetch("/current_angles")
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) return alert(data.error);
+            document.getElementById("currentAngles").textContent =
+                `φ (theta) = ${data.phi_deg.toFixed(3)}°, z = ${data.z_deg.toFixed(3)}°`;
+        })
+        .catch(err => alert("Error reading angles: " + err));
+}
+    
 </script>
 </body>
 </html>
