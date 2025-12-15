@@ -170,7 +170,7 @@ function moveOneDegree(motor, dir) {
     let z = 0;
 
     if (motor === 'theta') phi = dir * 1;  // theta buttons now rotate laser
-    if (motor === 'z') z = dir * 1;                      // z buttons move vertically
+    if (motor === 'z') z = dir * 32/90;                      // z buttons move vertically
 
     fetch("/move_motor", {
         method: "POST",
