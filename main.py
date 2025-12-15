@@ -194,7 +194,7 @@ def move_motor():
 
     r0 = my_turret["r"]
     theta0 = my_turret["theta"]  # turret fixed angle
-    z0 = 0
+    zo = 7.25
 
     # Load targets
     targets_data = read_target_positions(url)
@@ -235,7 +235,7 @@ def move_motor():
     phi_deg = math.degrees(phi_target)
 
     # Vertical movement
-    dz = zt - z0
+    dz = zt - zo
     z_deg = math.degrees(math.atan2(dz, dist))
 
     # Move motors
