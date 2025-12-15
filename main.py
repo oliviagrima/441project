@@ -283,6 +283,15 @@ def led_off():
     GPIO.output(led, GPIO.LOW)
     return jsonify({"status": "LED OFF"})
 
+@app.route("/current_angles", methods=["GET"])
+def current_angles():
+    try:
+        phi = m1.angle.value   # current horizontal angle
+        z = m2.angle.value     # current vertical angle
+        return jsonify({"phi_deg": phi, "z_deg": z})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == "__main__":
     try:
         init_hardware()
