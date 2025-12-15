@@ -204,7 +204,7 @@ def move_motor():
     # Find target
     target = None
     for t in targets_data["targets"]:
-        if target_type == "turret" and t.get("id") == target_id:
+        if target_type == "turret" and abs(t.get("theta") - float(target_id)) < 0.0001:
             target = t
             break
         if target_type == "globe" and abs(t.get("theta") - float(target_id)) < 0.0001:
