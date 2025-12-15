@@ -193,8 +193,6 @@ def move_motor():
         return jsonify(my_turret), 400
 
     r0 = my_turret["r"]
-    # delete later
-    r0 = r0 / 1000
     theta0 = my_turret["theta"]  # turret fixed angle
     zo = 7.7
 
@@ -217,8 +215,6 @@ def move_motor():
         return jsonify({"error": "Target not found"}), 400
 
     rt = target["r"]
-    # delete later
-    rt = rt / 1000
     thetat = target["theta"]
     zt = target.get("z", 0)
 
